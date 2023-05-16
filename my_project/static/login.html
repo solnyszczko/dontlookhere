@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='my.css') }}">
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Example Form</title>
+  </head>
+  <body>
+    <h1>Example Form</h1>
+    <form id="example-form">
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="text" id="password" name="password" required>
+      </div>
+      <div>
+        <input type="submit" value="Submit">
+      </div>
+    </form>
+    <script>
+      const form = document.querySelector('#example-form');
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        fetch('/auth/jwt/login', {
+          method: 'POST',
+          body: data,
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error(error));
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Roguelike Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
+  </head>
+  <body>
+    <canvas id="game-canvas" width="800" height="600"></canvas>
+    <script>
+      var client_id = Date.now()  
+      var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+      const canvas = document.getElementById('game-canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Draw the initial game state
+      function drawGameState(gameState) {
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Define the colors and sizes of the game entities
+  const colors = {
+    '#': 'black',
+    '@': 'red',
+    '.': 'grey'
+  };
+  const tileSize = 20;
+
+  // Draw the game entities
+  for (let row = 0; row < gameState.length; row++) {
+    for (let col = 0; col < gameState[row].length; col++) {
+      const tile = gameState[row][col];
+      const color = colors[tile] || 'white';
+      ctx.fillStyle = color;
+      ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
+    }
+  }
+}
+
+      // Handle game updates from the server
+      ws.on('message', (gameOutput) => {
+        drawGameState(gameOutput);
+      });
+
+      // Handle player input
+      window.addEventListener('keydown', (event) => {
+        const input = {
+          key: event.key,
+          keyCode: event.keyCode
+        };
+        ws.emit('action', JSON.stringify(input));
+      });
+    </script>
+  </body>
+</html>
