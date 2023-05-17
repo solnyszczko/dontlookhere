@@ -3,15 +3,14 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response, status, 
 
 from rich import inspect, print
 from rich.console import Console
-from fastapi.templating import Jinja2Templates
+
 from fastapi.responses import HTMLResponse, RedirectResponse
 from typing import Dict, List, Optional
 from fastapi.staticfiles import StaticFiles
 import random
 import uuid
-import jsonpickle
 import json
-
+import redis
 
 from app.db import User, db
 from app.schemas import UserCreate, UserRead, UserUpdate
@@ -26,37 +25,16 @@ from app.users import (
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+
 console = Console()
 
-app.include_router(
-    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
-)
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_reset_password_router(),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_verify_router(UserRead),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
-    tags=["users"],
-)
-app.include_router(
-    fastapi_users.get_oauth_router(google_oauth_client, auth_backend, SECRET),
-    prefix="/auth/google",
-    tags=["auth"],
-)
+pool = redis.ConnectionPool(host='localhost', port=6379, db=0, decode_responses=True)
+redis = redis.Redis(connection_pool=pool)
+
+redis.set('mykey', 'Hello from Python!')
+value = redis.get('mykey')
+print(value)
+redis.flushdb()
 
 
 class Player:
@@ -79,22 +57,29 @@ active_players = dict()
 
 def input_handler(data,id):
     if data == "up":
-        active_players[str(id)]["y"] -= 1
+        redis.hincrby(str(id), 'y',-1 ) 
     if data == "down":
-        active_players[str(id)]["y"] += 1
+        redis.hincrby(str(id), 'y',1 ) 
     if data == "left":
-        active_players[str(id)]["x"]-= 1
+        redis.hincrby(str(id), 'x',-1 ) 
     if data == "right":
-        active_players[str(id)]["x"] += 1                        
+        redis.hincrby(str(id), 'x',1 )                       
 
 def generate_character(id):
-   # game_state["players"].update(Player(name = ("meow"+ str(id)), x = random.randint(1,10), y = random.randint(1,10), z = random.randint(1,10), id = str(id)).__dict__)
     return Player(name = ("meow"+ id), x = random.randint(1,10), y = random.randint(1,10), z = random.randint(1,10), id = id)
-    print(game_state["players"])
-    
 
+def redis_gen_state():
+    keys = redis.keys('*')
+    values = []
+    # Retrieve values for each key
+    for key in keys:
+        print(key)
+        value = redis.hgetall(key)  # or r.hget(hash_key, field) for hash data structure
+        values.append(value)
+    print("MEOW")
+    print(values)
+    return values
 
-    
 
 
 class ConnectionManager:
@@ -105,8 +90,9 @@ class ConnectionManager:
         await websocket.accept()
         websocket.id = uuid.uuid4()
         
-        active_players[str(websocket.id)] = generate_character(str(websocket.id)).__dict__
-        print(active_players)
+       # active_players[str(websocket.id)] = generate_character(str(websocket.id)).__dict__
+        redis.hmset(str(websocket.id), generate_character(str(websocket.id)).__dict__)
+     #   print(active_players)
      #   print(websocket.id)
       #  print(websocket.headers)
         
@@ -115,7 +101,7 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
-        active_players.pop(str(websocket.id))
+        redis.delete(str(websocket.id))
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
@@ -147,17 +133,17 @@ async def get():
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
-    await manager.broadcast_game_state(list(active_players.values()))
+    await manager.broadcast_game_state(redis_gen_state())
     print("desu")
     try:
         while True:
             data = await websocket.receive_text()
             input_handler(data,websocket.id)
-            await manager.broadcast_game_state(list(active_players.values()))
+            await manager.broadcast_game_state(redis_gen_state())
      #       await manager.send_personal_message(f"You wrote: {data}", websocket)
       #      await manager.broadcast(f"Client #{client_id} says: {data}")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        await manager.broadcast_game_state(redis_gen_state())
 
 

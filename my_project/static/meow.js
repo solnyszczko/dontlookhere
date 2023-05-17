@@ -1,8 +1,7 @@
 var display = new ROT.Display({width:60, height:40});
 document.body.appendChild(this.display.getContainer());
-//this.display.draw(20,  20, "@", "#0f0");
-//this.display.draw(20,  21, "@", "#0f0");
-//console.log("meow")
+//this.display.draw(2,  2, "B", "#0f0");
+
 let keyBindings = {
     up: "ArrowUp",
     left: "ArrowLeft",
@@ -28,24 +27,19 @@ document.addEventListener("keydown", (event) => {
 
   
   function update_display(game_state) {
-  //  console.log("meow")
     console.log(game_state)
-   console.log(typeof game_state)
-  //  console.log(game_state.players)
-  //  console.log("meowmeow")
+
     display.clear()
 
     for (const character in game_state) {
         console.log(game_state[character])
         const noob = game_state[character]
-      //  console.log(character.players)
-        // Get character properties
-      //  const name = character.name
-        console.log("meow")
-    //    const color = character.color;
-        
+        console.log(typeof noob.x)
+        x = parseInt(noob.x)
+        y = parseInt(noob.y)
+ 
         // Draw the character
-        display.draw(noob.x,  noob.y, "@", "#0f0")
+        display.draw(x,  y, "@", "#0f0")
      
       }
 
@@ -57,14 +51,11 @@ document.addEventListener("keydown", (event) => {
 var client_id = Date.now()
 document.querySelector("#ws-id").textContent = client_id;
 var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+
 ws.onmessage = function(event) {
  //   console.log(event.data)
     const game_state_parsed = JSON.parse(event.data)
+    console.log(event)
     update_display(game_state_parsed)
-   // console.log("MEOW")
- //   var messages = document.getElementById('messages')
-   // var message = document.createElement('li')
-   // var content = document.createTextNode(event.data)
-   // message.appendChild(content)
-   // messages.appendChild(message)
+
 };
