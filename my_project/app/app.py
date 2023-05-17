@@ -79,9 +79,9 @@ active_players = dict()
 
 def input_handler(data,id):
     if data == "up":
-        active_players[str(id)]["y"] += 1
-    if data == "down":
         active_players[str(id)]["y"] -= 1
+    if data == "down":
+        active_players[str(id)]["y"] += 1
     if data == "left":
         active_players[str(id)]["x"]-= 1
     if data == "right":
@@ -115,12 +115,17 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
+        active_players.pop(str(websocket.id))
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
         
     async def send_game_state(self, message_dict: dict, websocket: WebSocket):
-        await websocket.send_json(message_dict)        
+        await websocket.send_json(message_dict)
+        
+    async def broadcast_game_state(self, message_dict: dict):
+      for connection in self.active_connections:  
+        await connection.send_json(message_dict)              
 
     async def broadcast(self, message: str):
         for connection in self.active_connections:
@@ -142,11 +147,13 @@ async def get():
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
+    await manager.broadcast_game_state(list(active_players.values()))
+    print("desu")
     try:
         while True:
             data = await websocket.receive_text()
             input_handler(data,websocket.id)
-            await manager.send_game_state(list(active_players.values()),websocket)
+            await manager.broadcast_game_state(list(active_players.values()))
      #       await manager.send_personal_message(f"You wrote: {data}", websocket)
       #      await manager.broadcast(f"Client #{client_id} says: {data}")
     except WebSocketDisconnect:

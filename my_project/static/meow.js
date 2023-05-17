@@ -1,7 +1,7 @@
-var display = new ROT.Display({width:60, height:60});
+var display = new ROT.Display({width:60, height:40});
 document.body.appendChild(this.display.getContainer());
-this.display.draw(20,  20, "@", "#0f0");
-this.display.draw(20,  21, "@", "#0f0");
+//this.display.draw(20,  20, "@", "#0f0");
+//this.display.draw(20,  21, "@", "#0f0");
 //console.log("meow")
 let keyBindings = {
     up: "ArrowUp",
@@ -34,7 +34,7 @@ document.addEventListener("keydown", (event) => {
   //  console.log(game_state.players)
   //  console.log("meowmeow")
     display.clear()
-    display.draw(22,  23, "@", "#0f0")
+
     for (const character in game_state) {
         console.log(game_state[character])
         const noob = game_state[character]
@@ -68,9 +68,3 @@ ws.onmessage = function(event) {
    // message.appendChild(content)
    // messages.appendChild(message)
 };
-function sendMessage(event) {
-    var input = document.getElementById("messageText")
-    ws.send(input.value)
-    input.value = ''
-    event.preventDefault()
-}
