@@ -20,14 +20,7 @@ class User(BeanieBaseUser, Document):
     oauth_accounts: List[OAuthAccount] = Field(default_factory=list)
 
 
-class Player(Document):
-    name: str
-    x: int
-    y: int
-    z: int
-    
-    
-    
+
 
 async def get_user_db():
     yield BeanieUserDatabase(User, OAuthAccount)
