@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Tuple, Type, TypeVar, Union
 import copy
 import math
+import numpy as np
 
 from render_order import RenderOrder
 
@@ -102,7 +103,15 @@ class Actor(Entity):
         fighter: Fighter,
         inventory: Inventory,
         level: Level,
+        id: Optional[str] = "",
     ):
+        self.visible = np.full(
+            (self.gamemap().width, self.gamemap().height), fill_value=False, order="F"
+        )  # Tiles the player can currently see
+        self.explored = np.full(
+            (self.gamemap().width, self.gamemap().height), fill_value=False, order="F"
+        )  # Tiles the player has seen before
+
         super().__init__(
             x=x,
             y=y,

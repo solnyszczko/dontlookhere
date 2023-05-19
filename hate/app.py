@@ -22,12 +22,14 @@ import copy
 import datetime
 from entity import Actor
 import entity_factories
+from game_map import GameWorld
+from setup_game import new_game
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
+my_engine = new_game()
 active_players = dict()
 
 
@@ -42,17 +44,10 @@ def input_handler(data, id):
         active_players[str(id)]["x"] += 1
 
 
-def generate_character(id):
+def generate_character(id: str) -> Actor:
     player = copy.deepcopy(entity_factories.player)
     player.id = id
     return player
-
-
-def generate_unique_state(id):
-    # get_fov
-    # aggregate visible objects
-    # return
-    pass
 
 
 test_player = generate_character("test")
@@ -66,7 +61,9 @@ class ConnectionManager:
         await websocket.accept()
         websocket.id = uuid.uuid4()
 
-        active_players[str(websocket.id)] = generate_character(str(websocket.id)).to_send()
+        active_players[str(websocket.id)] = generate_character(
+            str(websocket.id)
+        ).to_send()
         print(active_players)
         #   print(websocket.id)
         #  print(websocket.headers)

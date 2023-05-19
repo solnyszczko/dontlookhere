@@ -29,9 +29,7 @@ def new_game() -> Engine:
     room_min_size = 6
     max_rooms = 30
 
-    player = copy.deepcopy(entity_factories.player)
-
-    engine = Engine(player=player)
+    engine = Engine()
 
     engine.game_world = GameWorld(
         engine=engine,
@@ -45,19 +43,9 @@ def new_game() -> Engine:
     engine.game_world.generate_floor()
     engine.update_fov()
 
-    engine.message_log.add_message("Hello and welcome, adventurer, to yet another dungeon!", color.welcome_text)
-
-    dagger = copy.deepcopy(entity_factories.dagger)
-    leather_armor = copy.deepcopy(entity_factories.leather_armor)
-
-    dagger.parent = player.inventory
-    leather_armor.parent = player.inventory
-
-    player.inventory.items.append(dagger)
-    player.equipment.toggle_equip(dagger, add_message=False)
-
-    player.inventory.items.append(leather_armor)
-    player.equipment.toggle_equip(leather_armor, add_message=False)
+    engine.message_log.add_message(
+        "Hello and welcome, adventurer, to yet another dungeon!", color.welcome_text
+    )
 
     return engine
 
@@ -93,7 +81,9 @@ class MainMenu(input_handlers.BaseEventHandler):
         )
 
         menu_width = 24
-        for i, text in enumerate(["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]):
+        for i, text in enumerate(
+            ["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]
+        ):
             console.print(
                 console.width // 2,
                 console.height // 2 - 2 + i,
@@ -104,7 +94,9 @@ class MainMenu(input_handlers.BaseEventHandler):
                 bg_blend=tcod.BKGND_ALPHA(64),
             )
 
-    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[input_handlers.BaseEventHandler]:
+    def ev_keydown(
+        self, event: tcod.event.KeyDown
+    ) -> Optional[input_handlers.BaseEventHandler]:
         if event.sym in (tcod.event.K_q, tcod.event.K_ESCAPE):
             raise SystemExit()
         elif event.sym == tcod.event.K_c:

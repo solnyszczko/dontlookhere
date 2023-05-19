@@ -23,10 +23,9 @@ class Engine:
     def __init__(self, player: Actor):
         self.message_log = MessageLog()
         self.mouse_location = (0, 0)
-        self.player = player
 
     def handle_enemy_turns(self) -> None:
-        for entity in set(self.game_map.actors) - {self.player}:
+        for entity in set(self.game_map.actors):
             if entity.ai:
                 try:
                     entity.ai.perform()
@@ -35,13 +34,18 @@ class Engine:
 
     def update_fov(self) -> None:
         """Recompute the visible area based on the players point of view."""
-        self.game_map.visible[:] = compute_fov(
-            self.game_map.tiles["transparent"],
-            (self.player.x, self.player.y),
-            radius=8,
-        )
-        # If a tile is "visible" it should be added to "explored".
-        self.game_map.explored |= self.game_map.visible
+        for entity in set(self.game_map.actors):
+            if entity.visible:
+                try:
+                    entity.visible[:] = compute_fov(
+                        self.game_map.tiles["transparent"],
+                        (entity.x, entity.y),
+                        radius=8,
+                    )
+                    # If a tile is "visible" it should be added to "explored".
+                    entity.explored |= entity.visible
+                except exceptions.Impossible:
+                    pass  # Ignore impossible action exceptions from FOV
 
     def render(self, console: Console) -> None:
         self.game_map.render(console)
@@ -61,7 +65,9 @@ class Engine:
             location=(0, 47),
         )
 
-        render_functions.render_names_at_mouse_location(console=console, x=21, y=44, engine=self)
+        render_functions.render_names_at_mouse_location(
+            console=console, x=21, y=44, engine=self
+        )
 
     def save_as(self, filename: str) -> None:
         """Save this Engine instance as a compressed file."""
