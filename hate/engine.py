@@ -35,6 +35,10 @@ class Engine:
 
     def update_fov(self) -> None:
         """Recompute the visible area based on the players point of view."""
+        print("PRINTING ENTITIES")
+        print(self.game_map.entities)
+        print("PRINTING ACTORS")
+        print(self.game_map.actors)
         for entity in set(self.game_map.actors):
             if True:  # entity.visible
                 try:
@@ -51,13 +55,16 @@ class Engine:
                     self.unique_messages[entity.id] = entity.visible
 
                 except exceptions.Impossible:
+                    print("EPIC FAIL FIAFLAALLAF A")
                     pass  # Ignore impossible action exceptions from FOV
 
     def insert_actor(self, actor: Actor):
         self.game_map.entities.add(actor)
 
     def unique_render(self, id):
+        print("PRINTING UNIQUE MESSAGES")
         print(self.unique_messages)
+        print("PRINT DONE")
         return self.unique_messages[id]
 
     def render(self, console: Console) -> None:

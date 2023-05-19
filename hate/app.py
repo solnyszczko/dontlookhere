@@ -23,6 +23,8 @@ import datetime
 from entity import Actor
 import entity_factories
 from game_map import GameWorld
+from input_handlers import EventHandler
+from actions import BumpAction
 from setup_game import new_game
 
 app = FastAPI()
@@ -30,12 +32,14 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 my_engine = new_game()
+event_handler = EventHandler(my_engine)
 active_players = dict()
 
 
 def input_handler(data, id):
     if data == "up":
-        active_players[str(id)]["y"] -= 1
+        action = BumpAction(player, dx, dy)
+        # action.perform and event handler maingameeventhandler
     if data == "down":
         active_players[str(id)]["y"] += 1
     if data == "left":
@@ -102,7 +106,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     char = generate_character(websocket_id)
     print(vars(char))
     my_engine.insert_actor(char)
-    my_engine.update_fov
+    my_engine.update_fov()
     print(my_engine.unique_render(websocket_id))
     await manager.broadcast_game_state(list(active_players.values()))
     print("desu")
