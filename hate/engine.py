@@ -20,9 +20,10 @@ class Engine:
     game_map: GameMap
     game_world: GameWorld
 
-    def __init__(self, player: Actor):
+    def __init__(self):
         self.message_log = MessageLog()
         self.mouse_location = (0, 0)
+        self.unique_messages = dict()
 
     def handle_enemy_turns(self) -> None:
         for entity in set(self.game_map.actors):
@@ -35,7 +36,7 @@ class Engine:
     def update_fov(self) -> None:
         """Recompute the visible area based on the players point of view."""
         for entity in set(self.game_map.actors):
-            if entity.visible:
+            if True:  # entity.visible
                 try:
                     entity.visible[:] = compute_fov(
                         self.game_map.tiles["transparent"],
@@ -44,8 +45,20 @@ class Engine:
                     )
                     # If a tile is "visible" it should be added to "explored".
                     entity.explored |= entity.visible
+                    # Add to Uniqe Render
+                    print("BIGGGGGGGGGGGGGGGGGgg")
+                    print(entity.id)
+                    self.unique_messages[entity.id] = entity.visible
+
                 except exceptions.Impossible:
                     pass  # Ignore impossible action exceptions from FOV
+
+    def insert_actor(self, actor: Actor):
+        self.game_map.entities.add(actor)
+
+    def unique_render(self, id):
+        print(self.unique_messages)
+        return self.unique_messages[id]
 
     def render(self, console: Console) -> None:
         self.game_map.render(console)
@@ -54,8 +67,8 @@ class Engine:
 
         render_functions.render_bar(
             console=console,
-            current_value=self.player.fighter.hp,
-            maximum_value=self.player.fighter.max_hp,
+            #  current_value=self.player.fighter.hp,
+            #  maximum_value=self.player.fighter.max_hp,
             total_width=20,
         )
 

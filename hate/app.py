@@ -46,7 +46,8 @@ def input_handler(data, id):
 
 def generate_character(id: str) -> Actor:
     player = copy.deepcopy(entity_factories.player)
-    player.id = id
+    player.update_id(id)
+    print(vars(player))
     return player
 
 
@@ -60,13 +61,8 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         websocket.id = uuid.uuid4()
-
-        active_players[str(websocket.id)] = generate_character(
-            str(websocket.id)
-        ).to_send()
+        # active_players[str(websocket.id)] = generate_character(str(websocket.id)).to_send()
         print(active_players)
-        #   print(websocket.id)
-        #  print(websocket.headers)
 
         self.active_connections.append(websocket)
         print(self.active_connections)
@@ -102,6 +98,12 @@ async def get():
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
+    websocket_id = str(websocket.id)
+    char = generate_character(websocket_id)
+    print(vars(char))
+    my_engine.insert_actor(char)
+    my_engine.update_fov
+    print(my_engine.unique_render(websocket_id))
     await manager.broadcast_game_state(list(active_players.values()))
     print("desu")
     try:

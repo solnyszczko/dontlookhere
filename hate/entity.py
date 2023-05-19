@@ -45,6 +45,7 @@ class Entity:
         self.name = name
         self.blocks_movement = blocks_movement
         self.render_order = render_order
+
         if parent:
             # If parent isn't provided now then it will be set later.
             self.parent = parent
@@ -103,15 +104,15 @@ class Actor(Entity):
         fighter: Fighter,
         inventory: Inventory,
         level: Level,
-        id: Optional[str] = "",
     ):
         self.visible = np.full(
-            (self.gamemap().width, self.gamemap().height), fill_value=False, order="F"
+            (100, 100), fill_value=False, order="F"
         )  # Tiles the player can currently see
         self.explored = np.full(
-            (self.gamemap().width, self.gamemap().height), fill_value=False, order="F"
+            (100, 100), fill_value=False, order="F"
         )  # Tiles the player has seen before
-
+        # MAGIC NUMBERS
+        self.id: Optional[str] = "meow"
         super().__init__(
             x=x,
             y=y,
@@ -140,6 +141,9 @@ class Actor(Entity):
     def is_alive(self) -> bool:
         """Returns True as long as this actor can perform actions."""
         return bool(self.ai)
+
+    def update_id(self, id: str) -> None:
+        self.id = id
 
 
 class Item(Entity):
