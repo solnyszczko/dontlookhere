@@ -19,6 +19,7 @@ import json
 import copy
 import asyncio
 import tcod
+import exceptions
 
 # import redis.asyncio as redis
 import datetime
@@ -99,15 +100,36 @@ manager = ConnectionManager()
 
 
 async def test():
-    while True:
-        await asyncio.sleep(1)
-        print("asyncing")
-        # game think
-        my_engine.update_fov()
-        # game broadcast
-        await manager.broadcast_unique_state()
+    screen_width = 100
+    screen_height = 100
 
-    #   return None
+    tileset = tcod.tileset.load_tilesheet(
+        "data/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
+    )
+
+    with tcod.context.new(
+        columns=screen_width,
+        rows=screen_height,
+        tileset=tileset,
+        title="Yet Another Roguelike Tutorial",
+        vsync=True,
+    ) as context:
+        root_console = tcod.Console(screen_width, screen_height, order="F")
+        try:
+            while True:
+                await asyncio.sleep(1)
+                print("asyncing")
+                # game think
+                root_console.clear()
+                event_handler.on_render(console=root_console)
+                context.present(root_console)
+                my_engine.update_fov()
+                # game broadcast
+                await manager.broadcast_unique_state()
+        except exceptions.QuitWithoutSaving:
+            raise
+
+            #   return None
 
 
 @app.get("/")

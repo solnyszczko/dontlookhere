@@ -82,7 +82,7 @@ class GameMap:
         Otherwise, the default is "SHROUD".
         """
         console.rgb[0 : self.width, 0 : self.height] = np.select(
-            condlist=[self.visible, self.explored],
+            condlist=[True, False],
             choicelist=[self.tiles["light"], self.tiles["dark"]],
             default=tile_types.SHROUD,
         )
@@ -92,7 +92,7 @@ class GameMap:
         )
 
         for entity in entities_sorted_for_rendering:
-            if self.visible[entity.x, entity.y]:
+            if True:
                 console.print(
                     x=entity.x, y=entity.y, string=entity.char, fg=entity.color
                 )

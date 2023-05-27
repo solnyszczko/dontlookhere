@@ -44,10 +44,7 @@ class Engine:
 
     def update_fov(self) -> None:
         """Recompute the visible area based on the players point of view."""
-        print("PRINTING ENTITIES")
-        print(self.game_map.entities)
-        print("PRINTING ACTORS")
-        print(self.game_map.actors)
+
         for entity in set(self.game_map.actors):
             if True:  # entity.visible
                 try:
@@ -59,9 +56,6 @@ class Engine:
                     # If a tile is "visible" it should be added to "explored".
                     #    entity.explored |= entity.visible
                     # Add to Uniqe Render
-                    print("BIGGGGGGGGGGGGGGGGGgg")
-                    print(entity.id)
-                    print(visible)
                     self.unique_messages[entity.id] = visible
 
                 except exceptions.Impossible:
@@ -72,32 +66,14 @@ class Engine:
         self.game_map.entities.add(actor)
 
     def unique_render(self, id):
-        print("PRINTING UNIQUE MESSAGES")
-        print(self.unique_messages)
-        print("PRINT DONE")
+        print("PRINTING UNIQUE RENDER")
+        print(self.unique_messages[id])
         return self.unique_messages[id]
 
     def render(self, console: Console) -> None:
         self.game_map.render(console)
 
         self.message_log.render(console=console, x=21, y=45, width=40, height=5)
-
-        render_functions.render_bar(
-            console=console,
-            #  current_value=self.player.fighter.hp,
-            #  maximum_value=self.player.fighter.max_hp,
-            total_width=20,
-        )
-
-        render_functions.render_dungeon_level(
-            console=console,
-            dungeon_level=self.game_world.current_floor,
-            location=(0, 47),
-        )
-
-        render_functions.render_names_at_mouse_location(
-            console=console, x=21, y=44, engine=self
-        )
 
     def save_as(self, filename: str) -> None:
         """Save this Engine instance as a compressed file."""
