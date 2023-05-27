@@ -35,7 +35,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 my_engine = new_game()
 event_handler = MainGameEventHandler(my_engine)
-active_players = dict()
 
 
 def input_handler(data, char_id):
@@ -54,6 +53,7 @@ def input_handler(data, char_id):
 def generate_character(id: str) -> Actor:
     player = copy.deepcopy(entity_factories.player)
     player.update_id(id)
+    player.update_loc()
     #   print(vars(player))
     return player
 
@@ -68,16 +68,12 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         websocket.id = uuid.uuid4()
-        # active_players[str(websocket.id)] = generate_character(str(websocket.id)).to_send()
-        print(active_players)
 
         self.active_connections.append(websocket)
         print(self.active_connections)
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
-
-    #  active_players.pop(str(websocket.id))
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)

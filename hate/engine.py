@@ -51,17 +51,18 @@ class Engine:
         for entity in set(self.game_map.actors):
             if True:  # entity.visible
                 try:
-                    entity.visible[:] = compute_fov(
+                    visible = compute_fov(
                         self.game_map.tiles["transparent"],
                         (entity.x, entity.y),
                         radius=8,
                     )
                     # If a tile is "visible" it should be added to "explored".
-                    entity.explored |= entity.visible
+                    #    entity.explored |= entity.visible
                     # Add to Uniqe Render
                     print("BIGGGGGGGGGGGGGGGGGgg")
                     print(entity.id)
-                    self.unique_messages[entity.id] = entity.visible
+                    print(visible)
+                    self.unique_messages[entity.id] = visible
 
                 except exceptions.Impossible:
                     print("EPIC FAIL FIAFLAALLAF A")

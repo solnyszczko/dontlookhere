@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional, Tuple, Type, TypeVar, Union
 import copy
 import math
 import numpy as np
+import random
 
 from render_order import RenderOrder
 
@@ -144,6 +145,10 @@ class Actor(Entity):
 
     def update_id(self, id: str) -> None:
         self.id = id
+
+    def update_loc(self) -> None:
+        self.x = random.randint(1, 8)
+        self.y = random.randint(1, 8)
 
 
 class Item(Entity):
