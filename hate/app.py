@@ -17,6 +17,7 @@ import random
 import uuid
 import json
 import copy
+import asyncio
 
 # import redis.asyncio as redis
 import datetime
@@ -39,6 +40,7 @@ active_players = dict()
 def input_handler(data, id):
     if data == "up":
         action = BumpAction(player, dx, dy)
+        event_handler.handle_action(action)
         # action.perform and event handler maingameeventhandler
     if data == "down":
         active_players[str(id)]["y"] += 1
@@ -51,8 +53,18 @@ def input_handler(data, id):
 def generate_character(id: str) -> Actor:
     player = copy.deepcopy(entity_factories.player)
     player.update_id(id)
-    print(vars(player))
+    #   print(vars(player))
     return player
+
+
+async def test():
+    while True:
+        await asyncio.sleep(1)
+        print("asyncing")
+        # game think
+        # game broadcast
+
+    #   return None
 
 
 test_player = generate_character("test")
@@ -73,7 +85,8 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
-        active_players.pop(str(websocket.id))
+
+    #  active_players.pop(str(websocket.id))
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
@@ -104,19 +117,28 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
     websocket_id = str(websocket.id)
     char = generate_character(websocket_id)
-    print(vars(char))
+    #   print(vars(char))
     my_engine.insert_actor(char)
     my_engine.update_fov()
-    print(my_engine.unique_render(websocket_id))
-    await manager.broadcast_game_state(list(active_players.values()))
+    await manager.send_game_state(
+        (my_engine.unique_render(websocket_id)).tolist(), websocket
+    )
     print("desu")
     try:
         while True:
             data = await websocket.receive_text()
             input_handler(data, websocket.id)
-            await manager.broadcast_game_state(list(active_players.values()))
+            my_engine.update_fov()
+            await manager.send_game_state(
+                (my_engine.unique_render(websocket_id)).tolist(), websocket
+            )
     #       await manager.send_personal_message(f"You wrote: {data}", websocket)
     #      await manager.broadcast(f"Client #{client_id} says: {data}")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} left the chat")
+
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(test())
