@@ -3,13 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import lzma
 import pickle
-
+import numpy as np
 from tcod.console import Console
 from tcod.map import compute_fov
 
 from message_log import MessageLog
 import exceptions
 import render_functions
+import tile_types
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -65,9 +66,21 @@ class Engine:
     def insert_actor(self, actor: Actor):
         self.game_map.entities.add(actor)
 
-    def unique_render(self, id):
+    def unique_render(self, id, console):  # console stuff
         print("PRINTING UNIQUE RENDER")
         print(self.unique_messages[id])
+
+        unique_image = np.select(
+            condlist=[self.unique_messages[id]],
+            choicelist=[self.game_map.tiles["light"]],
+            default=tile_types.SHROUD,
+        )
+        entities_sorted_for_rendering = sorted(
+            self.game_map.entities, key=lambda x: x.render_order.value
+        )
+        for entity in entities_sorted_for_rendering:
+            console.print(x=entity.x, y=entity.y, string=entity.char, fg=entity.color)
+
         return self.unique_messages[id]
 
     def render(self, console: Console) -> None:

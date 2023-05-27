@@ -147,8 +147,8 @@ class Actor(Entity):
         self.id = id
 
     def update_loc(self) -> None:
-        self.x = random.randint(1, 8)
-        self.y = random.randint(1, 8)
+        self.x = random.randint(1, 90)
+        self.y = random.randint(1, 90)
 
 
 class Item(Entity):

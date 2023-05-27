@@ -86,10 +86,12 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_json(message_dict)
 
-    async def broadcast_unique_state(self):
+    async def broadcast_unique_state(self, console):
         for connection in self.active_connections:
             websocket_id = str(connection.id)
-            await connection.send_json((my_engine.unique_render(websocket_id)).tolist())
+            await connection.send_json(
+                (my_engine.unique_render(websocket_id, console)).tolist()
+            )
 
     async def broadcast(self, message: str):
         for connection in self.active_connections:
@@ -125,7 +127,7 @@ async def test():
                 context.present(root_console)
                 my_engine.update_fov()
                 # game broadcast
-                await manager.broadcast_unique_state()
+                await manager.broadcast_unique_state(root_console)
         except exceptions.QuitWithoutSaving:
             raise
 
