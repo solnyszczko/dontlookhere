@@ -25,6 +25,15 @@ class Engine:
         self.mouse_location = (0, 0)
         self.unique_messages = dict()
 
+    def get_player(self, id: str) -> Actor:
+        for entity in set(self.game_map.actors):
+            if entity.id == id:
+                try:
+                    return entity
+                except exceptions.Impossible:
+                    print("COULD NOT GET_PLAYER")
+                    pass  # Ignore impossible action exceptions from AI.
+
     def handle_enemy_turns(self) -> None:
         for entity in set(self.game_map.actors):
             if entity.ai:

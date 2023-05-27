@@ -18,13 +18,14 @@ import uuid
 import json
 import copy
 import asyncio
+import tcod
 
 # import redis.asyncio as redis
 import datetime
 from entity import Actor
 import entity_factories
 from game_map import GameWorld
-from input_handlers import EventHandler
+from input_handlers import MainGameEventHandler
 from actions import BumpAction
 from setup_game import new_game
 
@@ -33,21 +34,21 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 my_engine = new_game()
-event_handler = EventHandler(my_engine)
+event_handler = MainGameEventHandler(my_engine)
 active_players = dict()
 
 
-def input_handler(data, id):
+def input_handler(data, char_id):
     if data == "up":
-        action = BumpAction(player, dx, dy)
-        event_handler.handle_action(action)
+        event_handler.ev_keydown(data, char_id)
+        print("WENT UP")
         # action.perform and event handler maingameeventhandler
     if data == "down":
-        active_players[str(id)]["y"] += 1
+        event_handler.ev_keydown(data, char_id)
     if data == "left":
-        active_players[str(id)]["x"] -= 1
+        event_handler.ev_keydown(data, char_id)
     if data == "right":
-        active_players[str(id)]["x"] += 1
+        event_handler.ev_keydown(data, char_id)
 
 
 def generate_character(id: str) -> Actor:
@@ -55,16 +56,6 @@ def generate_character(id: str) -> Actor:
     player.update_id(id)
     #   print(vars(player))
     return player
-
-
-async def test():
-    while True:
-        await asyncio.sleep(1)
-        print("asyncing")
-        # game think
-        # game broadcast
-
-    #   return None
 
 
 test_player = generate_character("test")
@@ -98,12 +89,29 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_json(message_dict)
 
+    async def broadcast_unique_state(self):
+        for connection in self.active_connections:
+            websocket_id = str(connection.id)
+            await connection.send_json((my_engine.unique_render(websocket_id)).tolist())
+
     async def broadcast(self, message: str):
         for connection in self.active_connections:
             await connection.send_text(message)
 
 
 manager = ConnectionManager()
+
+
+async def test():
+    while True:
+        await asyncio.sleep(1)
+        print("asyncing")
+        # game think
+        my_engine.update_fov()
+        # game broadcast
+        await manager.broadcast_unique_state()
+
+    #   return None
 
 
 @app.get("/")
@@ -119,21 +127,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     char = generate_character(websocket_id)
     #   print(vars(char))
     my_engine.insert_actor(char)
-    my_engine.update_fov()
-    await manager.send_game_state(
-        (my_engine.unique_render(websocket_id)).tolist(), websocket
-    )
+
     print("desu")
     try:
         while True:
             data = await websocket.receive_text()
-            input_handler(data, websocket.id)
-            my_engine.update_fov()
-            await manager.send_game_state(
-                (my_engine.unique_render(websocket_id)).tolist(), websocket
-            )
-    #       await manager.send_personal_message(f"You wrote: {data}", websocket)
-    #      await manager.broadcast(f"Client #{client_id} says: {data}")
+            input_handler(data, websocket_id)
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} left the chat")

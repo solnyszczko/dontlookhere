@@ -14,6 +14,14 @@ if TYPE_CHECKING:
     from engine import Engine
     from entity import Item
 
+DATA_KEYS = {
+    # Arrow keys.
+    "up": (0, -1),
+    "down": (0, 1),
+    "left": (-1, 0),
+    "right": (1, 0),
+}
+
 
 MOVE_KEYS = {
     # Arrow keys.
@@ -514,21 +522,19 @@ class AreaRangedAttackHandler(SelectIndexHandler):
 
 
 class MainGameEventHandler(EventHandler):
-    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
+    def ev_keydown(self, event: str, char_id: str) -> Optional[ActionOrHandler]:
         action: Optional[Action] = None
 
-        key = event.sym
-        modifier = event.mod
+        key = event
+        # modifier = event.mod
 
-        player = self.engine.player
+        player = self.engine.get_player(char_id)
 
-        if key == tcod.event.K_PERIOD and modifier & (
-            tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
-        ):
-            return actions.TakeStairsAction(player)
+        #       if key == tcod.event.K_PERIOD and modifier & (            tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT        ):            return actions.TakeStairsAction(player)
 
-        if key in MOVE_KEYS:
-            dx, dy = MOVE_KEYS[key]
+        if key in DATA_KEYS:
+            print(key)
+            dx, dy = DATA_KEYS[key]
             action = BumpAction(player, dx, dy)
         elif key in WAIT_KEYS:
             action = WaitAction(player)
