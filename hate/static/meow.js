@@ -1,18 +1,18 @@
-var display = new ROT.Display({width:60, height:40});
+var display = new ROT.Display({ width: 60, height: 40 });
 document.body.appendChild(this.display.getContainer());
-//this.display.draw(2,  2, "B", "#0f0");
+this.display.draw(2, 2, "B", "#0f0");
 
 let keyBindings = {
     up: "ArrowUp",
     left: "ArrowLeft",
     right: "ArrowRight",
     down: "ArrowDown"
-  };
+};
 
 
 
 document.addEventListener("keydown", (event) => {
- //   console.log(event.code)
+    //   console.log(event.code)
     if (event.code === keyBindings.up) {
         ws.send("up")
     } else if (event.code === keyBindings.left) {
@@ -21,12 +21,52 @@ document.addEventListener("keydown", (event) => {
         ws.send("right")
     } else if (event.code === keyBindings.down) {
         ws.send("down")
-        
-    }
-  });
 
-  
-  function update_display(game_state) {
+    }
+});
+
+
+function update_display3(game_state) {
+    console.log(game_state)
+
+    display.clear()
+
+    for (const character in game_state) {
+        console.log(game_state[character])
+        //  const noob = game_state[character]
+        // console.log(typeof noob.x)
+        //   console.log(character)
+        const noob = game_state[character]
+        char = noob[0]
+        x = parseInt(noob[1])
+        y = parseInt(noob[2])
+        //   console.log(char)
+        //  console.log(typeof char)
+        //   console.log(x)
+
+
+
+        // Draw the character
+        display.draw(x, y, char, "#0f0")
+
+    }
+
+}
+
+
+var client_id = Date.now()
+document.querySelector("#ws-id").textContent = client_id;
+var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+
+ws.onmessage = function (event) {
+    //   console.log(event.data)
+    const game_state_parsed = JSON.parse(event.data)
+    //  console.log(event)
+    update_display3(game_state_parsed)
+
+};
+
+function update_display(game_state) {
     console.log(game_state)
 
     display.clear()
@@ -37,25 +77,42 @@ document.addEventListener("keydown", (event) => {
         console.log(typeof noob.x)
         x = parseInt(noob.x)
         y = parseInt(noob.y)
- 
+        char = noob.char
+
         // Draw the character
-        display.draw(x,  y, "@", "#0f0")
-     
-      }
+        display.draw(x, y, char, "#0f0")
+
+    }
 
 
 
 }
-  
 
-var client_id = Date.now()
-document.querySelector("#ws-id").textContent = client_id;
-var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
 
-ws.onmessage = function(event) {
- //   console.log(event.data)
-    const game_state_parsed = JSON.parse(event.data)
-    console.log(event)
-    update_display(game_state_parsed)
+function update_display2(game_state) {
+    console.log(game_state)
 
-};
+    display.clear()
+
+    for (const character in game_state) {
+        //  console.log(game_state[character])
+        //  const noob = game_state[character]
+        // console.log(typeof noob.x)
+        //   console.log(character)
+        char = character[0]
+        x = parseInt(character[1])
+        y = parseInt(character[2])
+        //   console.log(char)
+        //  console.log(typeof char)
+        //   console.log(x)
+
+
+
+        // Draw the character
+        display.draw(x, y, char, "#0f0")
+
+    }
+
+
+
+}

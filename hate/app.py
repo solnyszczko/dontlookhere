@@ -14,12 +14,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from typing import Dict, List, Optional
 from fastapi.staticfiles import StaticFiles
 import random
-import uuid
+import ulid
 import json
 import copy
 import asyncio
-import tcod
 import exceptions
+import numpy as np
 
 # import redis.asyncio as redis
 import datetime
@@ -34,6 +34,9 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
+magic_width = 100
+magic_height = 100
 my_engine = new_game()
 event_handler = MainGameEventHandler(my_engine)
 
@@ -68,10 +71,8 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        websocket.id = uuid.uuid4()
-
+        websocket.id = str(ulid.ULID())
         self.active_connections.append(websocket)
-        print(self.active_connections)
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
@@ -86,12 +87,10 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_json(message_dict)
 
-    async def broadcast_unique_state(self, console):
+    async def broadcast_unique_state(self):
         for connection in self.active_connections:
             websocket_id = str(connection.id)
-            await connection.send_json(
-                (my_engine.unique_render(websocket_id, console)).tolist()
-            )
+            await connection.send_json(my_engine.unique_render(websocket_id))
 
     async def broadcast(self, message: str):
         for connection in self.active_connections:
@@ -102,36 +101,15 @@ manager = ConnectionManager()
 
 
 async def test():
-    screen_width = 100
-    screen_height = 100
+    while True:
+        await asyncio.sleep(1)
+        print("asyncing")
+        # game think
+        my_engine.update_fov()
+        # game broadcast
+        await manager.broadcast_unique_state()
 
-    tileset = tcod.tileset.load_tilesheet(
-        "data/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
-    )
-
-    with tcod.context.new(
-        columns=screen_width,
-        rows=screen_height,
-        tileset=tileset,
-        title="Yet Another Roguelike Tutorial",
-        vsync=True,
-    ) as context:
-        root_console = tcod.Console(screen_width, screen_height, order="F")
-        try:
-            while True:
-                await asyncio.sleep(1)
-                print("asyncing")
-                # game think
-                root_console.clear()
-                event_handler.on_render(console=root_console)
-                context.present(root_console)
-                my_engine.update_fov()
-                # game broadcast
-                await manager.broadcast_unique_state(root_console)
-        except exceptions.QuitWithoutSaving:
-            raise
-
-            #   return None
+    #   return None
 
 
 @app.get("/")
@@ -143,7 +121,8 @@ async def get():
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
-    websocket_id = str(websocket.id)
+    websocket_id = websocket.id
+
     char = generate_character(websocket_id)
     #   print(vars(char))
     my_engine.insert_actor(char)

@@ -5,6 +5,7 @@ import copy
 import math
 import numpy as np
 import random
+import ulid
 
 from render_order import RenderOrder
 
@@ -39,6 +40,7 @@ class Entity:
         blocks_movement: bool = False,
         render_order: RenderOrder = RenderOrder.CORPSE,
     ):
+        self.id: Optional[str] = str(ulid.ULID())
         self.x = x
         self.y = y
         self.char = char
@@ -64,6 +66,7 @@ class Entity:
         clone = copy.deepcopy(self)
         clone.x = x
         clone.y = y
+        clone.id = str(ulid.ULID())
         clone.parent = gamemap
         gamemap.entities.add(clone)
         return clone
@@ -113,7 +116,7 @@ class Actor(Entity):
             (100, 100), fill_value=False, order="F"
         )  # Tiles the player has seen before
         # MAGIC NUMBERS
-        self.id: Optional[str] = "meow"
+
         super().__init__(
             x=x,
             y=y,

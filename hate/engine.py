@@ -66,11 +66,10 @@ class Engine:
     def insert_actor(self, actor: Actor):
         self.game_map.entities.add(actor)
 
-    def unique_render(self, id, console):  # console stuff
+    def unique_render(self, id):  # console stuff
         print("PRINTING UNIQUE RENDER")
-        print(self.unique_messages[id])
 
-        unique_image = np.select(
+        meow = np.select(
             condlist=[self.unique_messages[id]],
             choicelist=[self.game_map.tiles["light"]],
             default=tile_types.SHROUD,
@@ -78,15 +77,16 @@ class Engine:
         entities_sorted_for_rendering = sorted(
             self.game_map.entities, key=lambda x: x.render_order.value
         )
-        for entity in entities_sorted_for_rendering:
-            console.print(x=entity.x, y=entity.y, string=entity.char, fg=entity.color)
 
-        return self.unique_messages[id]
+        y = dict()
+        for entity in entities_sorted_for_rendering:
+            print(entity.id)
+            y[entity.id] = [entity.char, entity.x, entity.y]
+        print(y)
+        return y
 
     def render(self, console: Console) -> None:
         self.game_map.render(console)
-
-        self.message_log.render(console=console, x=21, y=45, width=40, height=5)
 
     def save_as(self, filename: str) -> None:
         """Save this Engine instance as a compressed file."""
