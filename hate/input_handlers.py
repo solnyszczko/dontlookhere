@@ -536,6 +536,7 @@ class MainGameEventHandler(EventHandler):
             print(key)
             dx, dy = DATA_KEYS[key]
             action = BumpAction(player, dx, dy)
+        #   print("BUMPIUNG")
         elif key in WAIT_KEYS:
             action = WaitAction(player)
 

@@ -20,6 +20,7 @@ import copy
 import asyncio
 import exceptions
 import numpy as np
+import pygame
 
 # import redis.asyncio as redis
 import datetime
@@ -39,25 +40,44 @@ magic_width = 100
 magic_height = 100
 my_engine = new_game()
 event_handler = MainGameEventHandler(my_engine)
+clock = pygame.time.Clock()
 
 
 def input_handler(data, char_id):
     if data == "up":
-        event_handler.ev_keydown(data, char_id)
-        print("WENT UP")
-        # action.perform and event handler maingameeventhandler
+        action = event_handler.ev_keydown(data, char_id)
+        try:
+            action.perform()
+        except exceptions.Impossible as exc:
+            print(exc)
+            return False  # Skip enemy turn on exceptions.
     if data == "down":
-        event_handler.ev_keydown(data, char_id)
+        action = event_handler.ev_keydown(data, char_id)
+        try:
+            action.perform()
+        except exceptions.Impossible as exc:
+            print(exc)
+            return False  # Skip enemy turn on exceptions.
     if data == "left":
-        event_handler.ev_keydown(data, char_id)
+        action = event_handler.ev_keydown(data, char_id)
+        try:
+            action.perform()
+        except exceptions.Impossible as exc:
+            print(exc)
+            return False  # Skip enemy turn on exceptions.
     if data == "right":
-        event_handler.ev_keydown(data, char_id)
+        action = event_handler.ev_keydown(data, char_id)
+        try:
+            action.perform()
+        except exceptions.Impossible as exc:
+            print(exc)
+            return False  # Skip enemy turn on exceptions.
 
 
 def generate_character(id: str) -> Actor:
     player = copy.deepcopy(entity_factories.player)
     player.update_id(id)
-    player.update_loc()
+    player.place(random.randint(1, 30), random.randint(1, 30), my_engine.game_map)
     #   print(vars(player))
     return player
 
@@ -89,8 +109,7 @@ class ConnectionManager:
 
     async def broadcast_unique_state(self):
         for connection in self.active_connections:
-            websocket_id = str(connection.id)
-            await connection.send_json(my_engine.unique_render(websocket_id))
+            await connection.send_json(my_engine.unique_render(connection.id))
 
     async def broadcast(self, message: str):
         for connection in self.active_connections:
@@ -102,9 +121,11 @@ manager = ConnectionManager()
 
 async def test():
     while True:
+        #    clock.tick(1)
         await asyncio.sleep(1)
         print("asyncing")
         # game think
+        #    my_engine.handle_enemy_turns()
         my_engine.update_fov()
         # game broadcast
         await manager.broadcast_unique_state()
@@ -135,7 +156,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+    #   await manager.broadcast(f"Client #{client_id} left the chat")
 
 
 @app.on_event("startup")

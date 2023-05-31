@@ -1,4 +1,4 @@
-var display = new ROT.Display({ width: 60, height: 40 });
+var display = new ROT.Display({ width: 100, height: 60 });
 document.body.appendChild(this.display.getContainer());
 this.display.draw(2, 2, "B", "#0f0");
 
