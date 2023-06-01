@@ -43,6 +43,20 @@ class Engine:
                 except exceptions.Impossible:
                     pass  # Ignore impossible action exceptions from AI.
 
+    def get_target(self) -> None:
+        distance = 100.0
+        for entity in set(self.game_map.actors):
+            for target in set(self.game_map.actors):
+                if entity != target:
+                    try:
+                        x = entity.distance(target.x, target.y)
+                        if x <= distance:
+                            distance = x
+                    except exceptions.Impossible:
+                        print("COULD NOT GET_PLAYER")
+                        pass  # Ignore impossible action exceptions from AI.
+            entity.target = target.x, target.y
+
     def update_fov(self) -> None:
         """Recompute the visible area based on the players point of view."""
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Optional, Tuple, Type, TypeVar, Union, List
 import copy
 import math
 import numpy as np
@@ -116,6 +116,7 @@ class Actor(Entity):
             (100, 100), fill_value=False, order="F"
         )  # Tiles the player has seen before
         # MAGIC NUMBERS
+        self.target = 0, 0
 
         super().__init__(
             x=x,

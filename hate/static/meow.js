@@ -6,7 +6,11 @@ let keyBindings = {
     up: "ArrowUp",
     left: "ArrowLeft",
     right: "ArrowRight",
-    down: "ArrowDown"
+    down: "ArrowDown",
+    wait: "KeyW",
+    a: "KeyA",
+    s: "KeyS",
+    d: "KeyD"
 };
 
 
@@ -21,7 +25,8 @@ document.addEventListener("keydown", (event) => {
         ws.send("right")
     } else if (event.code === keyBindings.down) {
         ws.send("down")
-
+    } else if (event.code === keyBindings.wait) {
+        ws.send("wait")
     }
 });
 

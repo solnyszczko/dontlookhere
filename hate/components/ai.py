@@ -53,16 +53,16 @@ class HostileEnemy(BaseAI):
 
     def perform(self) -> None:
         # Get nearest hostile
-        target = self.engine.player
-        dx = target.x - self.entity.x
-        dy = target.y - self.entity.y
+        target = self.entity.target
+        dx = target[0] - self.entity.x
+        dy = target[1] - self.entity.y
         distance = max(abs(dx), abs(dy))  # Chebyshev distance.
 
-        if self.engine.game_map.visible[self.entity.x, self.entity.y]:
+        if True:  # self.engine.game_map.visible[self.entity.x, self.entity.y]
             if distance <= 1:
                 return MeleeAction(self.entity, dx, dy).perform()
 
-            self.path = self.get_path_to(target.x, target.y)
+            self.path = self.get_path_to(target[0], target[1])
 
         if self.path:
             dest_x, dest_y = self.path.pop(0)

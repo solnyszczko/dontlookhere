@@ -44,34 +44,8 @@ clock = pygame.time.Clock()
 
 
 def input_handler(data, char_id):
-    if data == "up":
-        action = event_handler.ev_keydown(data, char_id)
-        try:
-            action.perform()
-        except exceptions.Impossible as exc:
-            print(exc)
-            return False  # Skip enemy turn on exceptions.
-    if data == "down":
-        action = event_handler.ev_keydown(data, char_id)
-        try:
-            action.perform()
-        except exceptions.Impossible as exc:
-            print(exc)
-            return False  # Skip enemy turn on exceptions.
-    if data == "left":
-        action = event_handler.ev_keydown(data, char_id)
-        try:
-            action.perform()
-        except exceptions.Impossible as exc:
-            print(exc)
-            return False  # Skip enemy turn on exceptions.
-    if data == "right":
-        action = event_handler.ev_keydown(data, char_id)
-        try:
-            action.perform()
-        except exceptions.Impossible as exc:
-            print(exc)
-            return False  # Skip enemy turn on exceptions.
+    action = event_handler.ev_keydown(data, char_id)
+    event_handler.handle_action(action)
 
 
 def generate_character(id: str) -> Actor:
@@ -129,6 +103,8 @@ async def test():
         # game think
         #    my_engine.handle_enemy_turns()
         my_engine.update_fov()
+        my_engine.get_target()
+        my_engine.handle_enemy_turns()
         # game broadcast
         await manager.broadcast_unique_state()
 

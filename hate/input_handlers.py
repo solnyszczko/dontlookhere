@@ -21,6 +21,7 @@ DATA_KEYS = {
     "left": (-1, 0),
     "right": (1, 0),
 }
+WAIT_KEYS = {"wait"}
 
 
 MOVE_KEYS = {
@@ -53,11 +54,6 @@ MOVE_KEYS = {
     tcod.event.K_n: (1, 1),
 }
 
-WAIT_KEYS = {
-    tcod.event.K_PERIOD,
-    tcod.event.K_KP_5,
-    tcod.event.K_CLEAR,
-}
 
 CONFIRM_KEYS = {
     tcod.event.K_RETURN,
@@ -120,14 +116,18 @@ class EventHandler(BaseEventHandler):
     def __init__(self, engine: Engine):
         self.engine = engine
 
-    def handle_events(self, event: tcod.event.Event) -> BaseEventHandler:
+    def handle_events(self, event: str) -> BaseEventHandler:
         """Handle events for input handlers with an engine."""
         action_or_state = self.dispatch(event)
         if isinstance(action_or_state, BaseEventHandler):
             return action_or_state
         if self.handle_action(action_or_state):
             # A valid action was performed.
-
+            if not self.engine.player.is_alive:
+                # The player was killed sometime during or after the action.
+                return GameOverEventHandler(self.engine)
+            elif self.engine.player.level.requires_level_up:
+                return LevelUpEventHandler(self.engine)
             return MainGameEventHandler(self.engine)  # Return to the main handler.
         return self
 
@@ -156,6 +156,67 @@ class EventHandler(BaseEventHandler):
 
     def on_render(self, console: tcod.Console) -> None:
         self.engine.render(console)
+
+
+class MainGameEventHandler(EventHandler):
+    def ev_keydown(self, event: str, char_id: str) -> Optional[ActionOrHandler]:
+        action: Optional[Action] = None
+
+        key = event
+        # modifier = event.mod
+
+        player = self.engine.get_player(char_id)
+
+        #       if key == tcod.event.K_PERIOD and modifier & (            tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT        ):            return actions.TakeStairsAction(player)
+
+        if key in DATA_KEYS:
+            print(key)
+            dx, dy = DATA_KEYS[key]
+            action = BumpAction(player, dx, dy)
+        #   print("BUMPIUNG")
+        elif key in WAIT_KEYS:
+            action = WaitAction(player)
+            print("WAITING")
+
+        elif key == tcod.event.K_ESCAPE:
+            raise SystemExit()
+        elif key == tcod.event.K_v:
+            return HistoryViewer(self.engine)
+
+        elif key == tcod.event.K_g:
+            action = PickupAction(player)
+
+        elif key == tcod.event.K_i:
+            return InventoryActivateHandler(self.engine)
+        elif key == tcod.event.K_d:
+            return InventoryDropHandler(self.engine)
+        elif key == tcod.event.K_c:
+            return CharacterScreenEventHandler(self.engine)
+        elif key == tcod.event.K_SLASH:
+            return LookHandler(self.engine)
+
+        # No valid key was pressed
+        return action
+
+    def handle_action(self, action: Optional[Action]) -> bool:
+        """Handle actions returned from event methods.
+
+        Returns True if the action will advance a turn.
+        """
+        if action is None:
+            return False
+
+        try:
+            action.perform()
+        except exceptions.Impossible as exc:
+            #    self.engine.message_log.add_message(exc.args[0], color.impossible)
+            print(exc)
+            return False  # Skip enemy turn on exceptions.
+
+        #    self.engine.handle_enemy_turns()
+
+        #   self.engine.update_fov()
+        return True
 
 
 class AskUserEventHandler(EventHandler):
@@ -196,6 +257,45 @@ class CharacterScreenEventHandler(AskUserEventHandler):
 
     def on_render(self, console: tcod.Console) -> None:
         super().on_render(console)
+
+        if self.engine.player.x <= 30:
+            x = 40
+        else:
+            x = 0
+
+        y = 0
+
+        width = len(self.TITLE) + 4
+
+        console.draw_frame(
+            x=x,
+            y=y,
+            width=width,
+            height=7,
+            title=self.TITLE,
+            clear=True,
+            fg=(255, 255, 255),
+            bg=(0, 0, 0),
+        )
+
+        console.print(
+            x=x + 1, y=y + 1, string=f"Level: {self.engine.player.level.current_level}"
+        )
+        console.print(
+            x=x + 1, y=y + 2, string=f"XP: {self.engine.player.level.current_xp}"
+        )
+        console.print(
+            x=x + 1,
+            y=y + 3,
+            string=f"XP for next Level: {self.engine.player.level.experience_to_next_level}",
+        )
+
+        console.print(
+            x=x + 1, y=y + 4, string=f"Attack: {self.engine.player.fighter.power}"
+        )
+        console.print(
+            x=x + 1, y=y + 5, string=f"Defense: {self.engine.player.fighter.defense}"
+        )
 
 
 class LevelUpEventHandler(AskUserEventHandler):
@@ -476,46 +576,6 @@ class AreaRangedAttackHandler(SelectIndexHandler):
 
     def on_index_selected(self, x: int, y: int) -> Optional[Action]:
         return self.callback((x, y))
-
-
-class MainGameEventHandler(EventHandler):
-    def ev_keydown(self, event: str, char_id: str) -> Optional[ActionOrHandler]:
-        action: Optional[Action] = None
-
-        key = event
-        # modifier = event.mod
-
-        player = self.engine.get_player(char_id)
-
-        #       if key == tcod.event.K_PERIOD and modifier & (            tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT        ):            return actions.TakeStairsAction(player)
-
-        if key in DATA_KEYS:
-            print(key)
-            dx, dy = DATA_KEYS[key]
-            action = BumpAction(player, dx, dy)
-        #   print("BUMPIUNG")
-        elif key in WAIT_KEYS:
-            action = WaitAction(player)
-
-        elif key == tcod.event.K_ESCAPE:
-            raise SystemExit()
-        elif key == tcod.event.K_v:
-            return HistoryViewer(self.engine)
-
-        elif key == tcod.event.K_g:
-            action = PickupAction(player)
-
-        elif key == tcod.event.K_i:
-            return InventoryActivateHandler(self.engine)
-        elif key == tcod.event.K_d:
-            return InventoryDropHandler(self.engine)
-        elif key == tcod.event.K_c:
-            return CharacterScreenEventHandler(self.engine)
-        elif key == tcod.event.K_SLASH:
-            return LookHandler(self.engine)
-
-        # No valid key was pressed
-        return action
 
 
 class GameOverEventHandler(EventHandler):
