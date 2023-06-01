@@ -77,7 +77,9 @@ def input_handler(data, char_id):
 def generate_character(id: str) -> Actor:
     player = copy.deepcopy(entity_factories.player)
     player.update_id(id)
-    player.place(random.randint(1, 50), random.randint(1, 50), my_engine.game_map)
+    spawn_x = my_engine.game_map.cool_center[0] + random.randint(1, 2)
+    spawn_y = my_engine.game_map.cool_center[1] + random.randint(1, 2)
+    player.place(spawn_x, spawn_y, my_engine.game_map)
     #   print(vars(player))
     return player
 

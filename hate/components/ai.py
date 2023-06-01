@@ -52,6 +52,7 @@ class HostileEnemy(BaseAI):
         self.path: List[Tuple[int, int]] = []
 
     def perform(self) -> None:
+        # Get nearest hostile
         target = self.engine.player
         dx = target.x - self.entity.x
         dy = target.y - self.entity.y
@@ -80,7 +81,9 @@ class ConfusedEnemy(BaseAI):
     If an actor occupies a tile it is randomly moving into, it will attack.
     """
 
-    def __init__(self, entity: Actor, previous_ai: Optional[BaseAI], turns_remaining: int):
+    def __init__(
+        self, entity: Actor, previous_ai: Optional[BaseAI], turns_remaining: int
+    ):
         super().__init__(entity)
 
         self.previous_ai = previous_ai
@@ -89,7 +92,9 @@ class ConfusedEnemy(BaseAI):
     def perform(self) -> None:
         # Revert the AI back to the original state if the effect has run its course.
         if self.turns_remaining <= 0:
-            self.engine.message_log.add_message(f"The {self.entity.name} is no longer confused.")
+            self.engine.message_log.add_message(
+                f"The {self.entity.name} is no longer confused."
+            )
             self.entity.ai = self.previous_ai
         else:
             # Pick a random direction

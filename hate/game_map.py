@@ -23,6 +23,7 @@ class GameMap:
         self.tiles = np.full((width, height), fill_value=tile_types.wall, order="F")
 
         self.downstairs_location = (0, 0)
+        self.cool_center = (1, 1)
 
     @property
     def gamemap(self) -> GameMap:
@@ -152,7 +153,7 @@ class GameWorld:
 
         self.current_floor += 1
 
-        self.engine.game_map = generate_dungeon(
+        beep = generate_dungeon(
             max_rooms=self.max_rooms,
             room_min_size=self.room_min_size,
             room_max_size=self.room_max_size,
@@ -160,3 +161,6 @@ class GameWorld:
             map_height=self.map_height,
             engine=self.engine,
         )
+
+        self.engine.game_map = beep[0]
+        self.engine.game_map.cool_center = beep[1]

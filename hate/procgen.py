@@ -160,7 +160,7 @@ def generate_dungeon(
     map_width: int,
     map_height: int,
     engine: Engine,
-) -> GameMap:
+) -> Tuple[GameMap, Tuple[int, int]]:
     """Generate a new dungeon map."""
     # player = engine.player
     dungeon = GameMap(engine, map_width, map_height, entities=[])
@@ -188,9 +188,7 @@ def generate_dungeon(
         dungeon.tiles[new_room.inner] = tile_types.floor
 
         if len(rooms) == 0:
-            # The first room, where the player starts.
-            # player.place(*new_room.center, dungeon)
-            pass
+            cool_center = new_room.center
         else:  # All rooms after the first.
             # Dig out a tunnel between this room and the previous one.
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
@@ -206,4 +204,4 @@ def generate_dungeon(
         # Finally, append the new room to the list.
         rooms.append(new_room)
 
-    return dungeon
+    return dungeon, cool_center
