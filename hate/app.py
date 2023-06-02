@@ -103,10 +103,10 @@ async def test():
         # game think
         #    my_engine.handle_enemy_turns()
         my_engine.update_fov()
+        await manager.broadcast_unique_state()
         my_engine.get_target()
         my_engine.handle_enemy_turns()
         # game broadcast
-        await manager.broadcast_unique_state()
 
     #   return None
 

@@ -109,13 +109,6 @@ class Actor(Entity):
         inventory: Inventory,
         level: Level,
     ):
-        self.visible = np.full(
-            (100, 100), fill_value=False, order="F"
-        )  # Tiles the player can currently see
-        self.explored = np.full(
-            (100, 100), fill_value=False, order="F"
-        )  # Tiles the player has seen before
-        # MAGIC NUMBERS
         self.target = 0, 0
 
         super().__init__(

@@ -92,10 +92,13 @@ class Engine:
             self.game_map.entities, key=lambda x: x.render_order.value
         )
 
+        desu = self.unique_messages[id]
+
         y = dict()
         for entity in entities_sorted_for_rendering:
-            print(entity.id)
-            y[entity.id] = [entity.char, entity.x, entity.y]
+            if desu[entity.x, entity.y]:
+                print(entity.id)
+                y[entity.id] = [entity.char, entity.x, entity.y]
         print(y)
         return y
 
