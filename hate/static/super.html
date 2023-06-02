@@ -26,8 +26,27 @@
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
     <script src="/static/rot.js"></script>
+
     <script>
         var myLayout = null; // Declare myLayout variable
+        let keyBindings = {
+            up: "ArrowUp",
+            left: "ArrowLeft",
+            right: "ArrowRight",
+            down: "ArrowDown",
+            wait: "KeyW",
+            a: "KeyA",
+            s: "KeyS",
+            d: "KeyD"
+        };
+
+        var client_id = Date.now()
+        var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+
+
+
+
+
 
         function resizeContainer() {
             var windowHeight = window.innerHeight;
@@ -42,17 +61,20 @@
                 content: [{
                     type: 'component',
                     componentName: 'meow',
-                    componentState: { label: 'Component 1' }
+                    componentState: { label: 'Component 1' },
+                    width: 80
                 }, {
                     type: 'column',
                     content: [{
                         type: 'component',
                         componentName: 'exampleComponent',
-                        componentState: { label: 'Component 2' }
+                        componentState: { label: 'Component 2' },
+                        height: 50
                     }, {
                         type: 'component',
                         componentName: 'exampleComponent',
-                        componentState: { label: 'Component 3' }
+                        componentState: { label: 'Component 3' },
+                        height: 50
                     }]
                 }]
             }]
@@ -76,12 +98,68 @@
 
             // Example: Draw a green letter 'B' on the display
             display.draw(2, 2, 'B', '#0f0');
+
+
+
+            function update_display(game_state) {
+                console.log(game_state)
+
+                display.clear()
+
+                for (const character in game_state) {
+                    console.log(game_state[character])
+                    //  const noob = game_state[character]
+                    // console.log(typeof noob.x)
+                    //   console.log(character)
+                    const noob = game_state[character]
+                    char = noob[0]
+                    x = parseInt(noob[1])
+                    y = parseInt(noob[2])
+                    //   console.log(char)
+                    //  console.log(typeof char)
+                    //   console.log(x)
+
+
+
+                    // Draw the character
+                    display.draw(x, y, char, "#0f0")
+
+                }
+
+            }
+
+
+            ws.onmessage = function (event) {
+                //   console.log(event.data)
+                const game_state_parsed = JSON.parse(event.data)
+                //  console.log(event)
+                update_display(game_state_parsed)
+
+            };
+
+
+
         });
 
         myLayout.init();
 
         // Attach event listener to window resize event
         window.addEventListener('resize', resizeContainer);
+        window.addEventListener("keydown", (event) => {
+            //   console.log(event.code)
+            if (event.code === keyBindings.up) {
+                ws.send("up")
+            } else if (event.code === keyBindings.left) {
+                ws.send("left")
+            } else if (event.code === keyBindings.right) {
+                ws.send("right")
+            } else if (event.code === keyBindings.down) {
+                ws.send("down")
+            } else if (event.code === keyBindings.wait) {
+                ws.send("wait")
+            }
+        });
+
 
         // Resize container initially
         resizeContainer();
