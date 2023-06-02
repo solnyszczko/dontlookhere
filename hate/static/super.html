@@ -8,13 +8,15 @@
     <style>
         /* Set the height of the container */
         #layoutContainer {
-            height: 100%;
+            height: 100vh;
             /* Set initial height */
         }
 
         /* Disable scrolling */
         html,
         body {
+            margin: 0;
+            padding: 0;
             overflow: hidden;
         }
     </style>
@@ -35,13 +37,22 @@
             right: "ArrowRight",
             down: "ArrowDown",
             wait: "KeyW",
-            a: "KeyA",
-            s: "KeyS",
-            d: "KeyD"
         };
 
         var client_id = Date.now()
         var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+
+        // Create a container element within the component's content
+        var displayContainer = document.createElement('div');
+        displayContainer.id = 'rotDisplay'; // Set an ID for the container element
+        displayContainer.style.height = '100%';
+
+        // Initialize the ROT.js display
+        var display = new ROT.Display({ width: 100, height: 60 });
+        displayContainer.appendChild(display.getContainer());
+
+        // Example: Draw a green letter 'B' on the display
+        display.draw(2, 2, 'B', '#0f0');
 
         function resizeContainer() {
             var windowHeight = window.innerHeight;
@@ -49,6 +60,7 @@
             containerElement.style.height = windowHeight + 'px';
             myLayout.updateSize(); // Update GoldenLayout with new size
         }
+
         var config = {
             content: [{
                 type: 'row',
@@ -73,69 +85,40 @@
                 }]
             }]
         };
+
         myLayout = new GoldenLayout(config, '#layoutContainer');
+
         myLayout.registerComponent('exampleComponent', function (container, state) {
             container.getElement().html('<h2>' + state.label + '</h2>');
         });
-        myLayout.registerComponent('meow', function (container, state) {
-            // Create a container element within the component's content
-            var displayContainer = document.createElement('div');
-            displayContainer.id = 'rotDisplay'; // Set an ID for the container element
-            container.getElement().append(displayContainer);
-            // Initialize the ROT.js display
-            console.log(parseInt(displayContainer.offsetWidth))
-            console.log(typeof (displayContainer.offsetWidth))
-            var display = new ROT.Display({ width: parseInt(displayContainer.offsetWidth), height: parseInt(displayContainer.offsetHeight) });
-            displayContainer.appendChild(display.getContainer());
-            // Example: Draw a green letter 'B' on the display
-            display.draw(2, 2, 'B', '#0f0');
 
+        myLayout.registerComponent('meow', function (container, state) {
+            container.getElement().append(displayContainer);
+
+            function resizeROTDisplay() {
+                var componentElement = container.getElement()[0];
+                var componentWidth = parseInt((componentElement.clientWidth) / 10);
+                var componentHeight = parseInt((componentElement.clientHeight) / 10);
+                console.log(componentHeight)
+                display.setOptions({ width: componentWidth, height: componentHeight });
+
+            }
 
             function update_display(game_state) {
-                //   console.log(game_state)
-
-                display.clear()
+                display.clear();
+                resizeROTDisplay()
 
                 for (const character in game_state) {
-                    if (character != "visible") {
-                        console.log(game_state[character])
+                    console.log(game_state[character])
 
-                        //  const noob = game_state[character]
-                        const noob = game_state[character]
-                        char = noob[0]
-                        x = parseInt(noob[1])
-                        y = parseInt(noob[2])
+                    const noob = game_state[character]
+                    char = noob[0]
+                    x = parseInt(noob[1])
+                    y = parseInt(noob[2])
 
-                        //  console.log(typeof char)
+                    // Draw the character
+                    display.draw(x, y, char, "#0f0")
 
-                        display.draw(x, y, char, "#0f0")
-                    }
-                    if (character == "visible") {
-                        for (const x in game_state[character]) {
-                            console.log(game_state[character])
-                            for (const y in game_state[character][x]) {
-                                console.log(game_state[character][x])
-                                console.log("hi")
-                                console.log(y)
-                                console.log(game_state[character][x][y])
-
-                                if (game_state[character][x][y] == true) {
-                                    console.log("trueeee")
-
-                                    display.draw(x, y, ' ', "#0f0")
-                                }
-                                if (game_state[character][x][y] == false) {
-                                    console.log("falseeee")
-
-
-                                    display.draw(x, y, ' ', "#0a0")
-                                }
-                            }
-
-                        }
-
-
-                    }
                 }
             }
             ws.onmessage = function (event) {
@@ -143,7 +126,6 @@
                 const game_state_parsed = JSON.parse(event.data)
                 //  console.log(event)
                 update_display(game_state_parsed)
-
             };
         });
         myLayout.init();
