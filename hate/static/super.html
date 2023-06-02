@@ -109,16 +109,32 @@
                 resizeROTDisplay()
 
                 for (const character in game_state) {
-                    console.log(game_state[character])
+                    if (character != "visible") {
+                        console.log(game_state[character])
 
-                    const noob = game_state[character]
-                    char = noob[0]
-                    x = parseInt(noob[1])
-                    y = parseInt(noob[2])
+                        const noob = game_state[character]
+                        char = noob[0]
+                        x = parseInt(noob[1])
+                        y = parseInt(noob[2])
 
-                    // Draw the character
-                    display.draw(x, y, char, "#0f0")
+                        // Draw the character
+                        display.draw(x, y, char, "#0f0")
+                    }
+                    if (character == "visible") {
+                        console.log("VISIBLE")
+                        for (const x in game_state[character]) {
+                            for (const y in game_state[character][x]) {
+                                if (game_state[character][x][y] == true) {
+                                    console.log("TRUEEE")
 
+                                    display.draw(x, y, ' ', "#f00", "#f00")
+
+                                }
+
+                            }
+
+                        }
+                    }
                 }
             }
             ws.onmessage = function (event) {
@@ -127,8 +143,11 @@
                 //  console.log(event)
                 update_display(game_state_parsed)
             };
+
         });
         myLayout.init();
+
+
         // Attach event listener to window resize event
         window.addEventListener('resize', resizeContainer);
         window.addEventListener("keydown", (event) => {
