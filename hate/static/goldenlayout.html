@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css">
+    <link rel="stylesheet" type="text/css"
+        href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css">
+    <style>
+        /* Set the height of the container */
+        #layoutContainer {
+            height: 100%;
+            /* Set initial height */
+        }
+
+        /* Disable scrolling */
+        html,
+        body {
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="layoutContainer"></div>
+
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+    <script>
+        var myLayout = null; // Declare myLayout variable
+
+        function resizeContainer() {
+            var windowHeight = window.innerHeight;
+            var containerElement = document.getElementById('layoutContainer');
+            containerElement.style.height = windowHeight + 'px';
+            myLayout.updateSize(); // Update GoldenLayout with new size
+        }
+
+        var config = {
+            content: [{
+                type: 'row',
+                content: [{
+                    type: 'component',
+                    componentName: 'meow',
+                    componentState: { label: 'Component 1' }
+                }, {
+                    type: 'column',
+                    content: [{
+                        type: 'component',
+                        componentName: 'exampleComponent',
+                        componentState: { label: 'Component 2' }
+                    }, {
+                        type: 'component',
+                        componentName: 'exampleComponent',
+                        componentState: { label: 'Component 3' }
+                    }]
+                }]
+            }]
+        };
+
+        myLayout = new GoldenLayout(config, '#layoutContainer');
+
+        myLayout.registerComponent('exampleComponent', function (container, state) {
+            container.getElement().html('<h2>' + state.label + '</h2>');
+        });
+
+        myLayout.registerComponent('meow', function (container, state) {
+            // Clone the document body's content
+            var bodyContent = document.body.cloneNode(true);
+
+            // Append the cloned content to the component's container
+            container.getElement().html(bodyContent);
+        });
+
+        myLayout.init();
+
+        // Attach event listener to window resize event
+        window.addEventListener('resize', resizeContainer);
+
+        // Resize container initially
+        resizeContainer();
+    </script>
+</body>
+
+</html>

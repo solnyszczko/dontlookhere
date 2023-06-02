@@ -95,6 +95,7 @@ class Engine:
         desu = self.unique_messages[id]
 
         y = dict()
+        y["visible"] = desu.tolist()
         for entity in entities_sorted_for_rendering:
             if desu[entity.x, entity.y]:
                 print(entity.id)

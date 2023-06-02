@@ -13,8 +13,6 @@ let keyBindings = {
     d: "KeyD"
 };
 
-
-
 document.addEventListener("keydown", (event) => {
     //   console.log(event.code)
     if (event.code === keyBindings.up) {
@@ -31,7 +29,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 
-function update_display3(game_state) {
+function update_display(game_state) {
     console.log(game_state)
 
     display.clear()
@@ -67,57 +65,7 @@ ws.onmessage = function (event) {
     //   console.log(event.data)
     const game_state_parsed = JSON.parse(event.data)
     //  console.log(event)
-    update_display3(game_state_parsed)
+    update_display(game_state_parsed)
 
 };
 
-function update_display(game_state) {
-    console.log(game_state)
-
-    display.clear()
-
-    for (const character in game_state) {
-        console.log(game_state[character])
-        const noob = game_state[character]
-        console.log(typeof noob.x)
-        x = parseInt(noob.x)
-        y = parseInt(noob.y)
-        char = noob.char
-
-        // Draw the character
-        display.draw(x, y, char, "#0f0")
-
-    }
-
-
-
-}
-
-
-function update_display2(game_state) {
-    console.log(game_state)
-
-    display.clear()
-
-    for (const character in game_state) {
-        //  console.log(game_state[character])
-        //  const noob = game_state[character]
-        // console.log(typeof noob.x)
-        //   console.log(character)
-        char = character[0]
-        x = parseInt(character[1])
-        y = parseInt(character[2])
-        //   console.log(char)
-        //  console.log(typeof char)
-        //   console.log(x)
-
-
-
-        // Draw the character
-        display.draw(x, y, char, "#0f0")
-
-    }
-
-
-
-}
