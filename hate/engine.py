@@ -6,6 +6,7 @@ import pickle
 import numpy as np
 from tcod.console import Console
 from tcod.map import compute_fov
+import random
 
 from message_log import MessageLog
 import exceptions
@@ -96,6 +97,7 @@ class Engine:
 
         y = dict()
         y["visible"] = desu.tolist()
+        y["info"] = "lol" + str(random.randint(0, 100))
         for entity in entities_sorted_for_rendering:
             if desu[entity.x, entity.y]:
                 print(entity.id)

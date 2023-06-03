@@ -2,9 +2,8 @@
 <html>
 
 <head>
-    <link rel="stylesheet" type="text/css" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css">
-    <link rel="stylesheet" type="text/css"
-        href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css">
+    <link rel="stylesheet" type="text/css" href="/static/goldenlayout-base.css">
+    <link rel="stylesheet" type="text/css" href="/static/goldenlayout-dark-theme.css">
     <style>
         /* Set the height of the container */
         #layoutContainer {
@@ -25,8 +24,8 @@
 <body>
     <div id="layoutContainer"></div>
 
-    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+    <script src="/static/jquery-1.11.1.min.js"></script>
+    <script src="/static/goldenlayout.min.js"></script>
     <script src="/static/rot.js"></script>
 
     <script>
@@ -51,8 +50,22 @@
         var display = new ROT.Display({ width: 100, height: 60 });
         displayContainer.appendChild(display.getContainer());
 
+
+        // Create a container element within the component's content MESSAGES
+        var message_displayContainer = document.createElement('div');
+        message_displayContainer.id = 'messageDisplay'; // Set an ID for the container element
+        message_displayContainer.style.height = '100%';
+
+        // Initialize the ROT.js display
+        var message_display = new ROT.Display({ width: 100, height: 60 });
+        message_displayContainer.appendChild(message_display.getContainer());
+
+
+
+
         // Example: Draw a green letter 'B' on the display
         display.draw(2, 2, 'B', '#0f0');
+        message_display.drawText(5, 2, "Hello world");
 
         function resizeContainer() {
             var windowHeight = window.innerHeight;
@@ -73,7 +86,7 @@
                     type: 'column',
                     content: [{
                         type: 'component',
-                        componentName: 'exampleComponent',
+                        componentName: 'mjau',
                         componentState: { label: 'Component 2' },
                         height: 50
                     }, {
@@ -99,7 +112,7 @@
                 var componentElement = container.getElement()[0];
                 var componentWidth = parseInt((componentElement.clientWidth) / 10);
                 var componentHeight = parseInt((componentElement.clientHeight) / 10);
-                console.log(componentHeight)
+                console.log("ROT DISPLAY")
                 display.setOptions({ width: componentWidth, height: componentHeight });
 
             }
@@ -144,6 +157,29 @@
                 update_display(game_state_parsed)
             };
 
+        });
+
+        myLayout.registerComponent('mjau', function (container, state) {
+            container.getElement().append(message_displayContainer);
+
+            function resizeMESSAGEDisplay() {
+                console.log(container)
+                var componentElement = container.getElement()[0];
+                var componentWidth = parseInt((componentElement.clientWidth) / 10);
+                var componentHeight = parseInt((componentElement.clientHeight) / 10);
+                console.log(componentHeight)
+                message_display.setOptions({ width: componentWidth, height: componentHeight });
+
+            }
+
+            function update_message_display(game_state) {
+                message_display.clear();
+                resizeMESSAGEDisplay()
+                message_display.drawText(5, 2, "Hello world");
+
+
+            }
+            update_message_display("meow")
         });
         myLayout.init();
 

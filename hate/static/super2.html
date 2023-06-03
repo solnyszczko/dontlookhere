@@ -81,31 +81,11 @@
         }
 
         function update_display(game_state, container) {
-            resizeROTDisplay(container, display)
             display.clear();
-            message_display.clear();
-
+            resizeROTDisplay(container, display)
 
             for (const character in game_state) {
-
-                if (character == "info") {
-                    console.log(game_state[character])
-
-
-                    message_display.drawText(5, 2, game_state[character]);
-                }
-                else if (character == "visible") {
-                    console.log("VISIBLE")
-                    for (const x of Object.keys(game_state[character])) {
-                        for (const y of Object.keys(game_state[character][x])) {
-                            if (game_state[character][x][y] === true) {
-                                console.log("TRUEEE");
-                                display.draw(x, y, ' ', "#f00", "#f00");
-                            }
-                        }
-                    }
-                }
-                else {
+                if (character != "visible") {
                     console.log(game_state[character])
 
                     const noob = game_state[character]
@@ -115,6 +95,21 @@
 
                     // Draw the character
                     display.draw(x, y, char, "#0f0")
+                }
+                if (character == "visible") {
+                    console.log("VISIBLE")
+                    for (const x in game_state[character]) {
+                        for (const y in game_state[character][x]) {
+                            if (game_state[character][x][y] == true) {
+                                console.log("TRUEEE")
+
+                                display.draw(x, y, ' ', "#f00", "#f00")
+
+                            }
+
+                        }
+
+                    }
                 }
             }
         }
@@ -178,7 +173,7 @@
 
             // Function to render the next message in the log
             function renderNextMessage() {
-
+                message_display.clear();
                 resizeROTDisplay(container, message_display)
                 if (true) {
                     var message = messageLog[messageIndex];
@@ -208,8 +203,10 @@
             //   console.log(event.code)
             if (event.code === keyBindings.up) {
                 ws.send("up")
+                message_display.drawText(5, 2, "up");
             } else if (event.code === keyBindings.left) {
                 ws.send("left")
+                message_display.drawText(5, 2, "left");
             } else if (event.code === keyBindings.right) {
                 ws.send("right")
             } else if (event.code === keyBindings.down) {
