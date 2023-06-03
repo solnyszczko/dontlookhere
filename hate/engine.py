@@ -83,26 +83,43 @@ class Engine:
 
     def unique_render(self, id):  # console stuff
         print("PRINTING UNIQUE RENDER")
+        player = self.get_player(id)
+        radius = 20
 
         meow = np.select(
             condlist=[self.unique_messages[id]],
             choicelist=[self.game_map.tiles["light"]],
             default=tile_types.SHROUD,
         )
+        center_x = int(player.x)
+        center_y = int(player.y)
+
+        start_x = center_x - radius
+        end_x = center_x + radius
+        start_y = center_y - radius
+        end_y = center_y + radius
+
+        smaller_array = meow[start_x:end_x, start_y:end_y]
+
         entities_sorted_for_rendering = sorted(
             self.game_map.entities, key=lambda x: x.render_order.value
         )
-
+        print("SMALLER ARRYA SMNALLER ARARY")
+        print(smaller_array)
         desu = self.unique_messages[id]
 
         y = dict()
-        y["visible"] = desu.tolist()
+        y["visible"] = smaller_array.tolist()
         y["info"] = "lol" + str(random.randint(0, 100))
         for entity in entities_sorted_for_rendering:
             if desu[entity.x, entity.y]:
                 print(entity.id)
-                y[entity.id] = [entity.char, entity.x, entity.y]
-        print(y)
+                y[entity.id] = [
+                    entity.char,
+                    int(radius + entity.x - player.x),
+                    int(radius + entity.y - player.y),
+                ]
+
         return y
 
     def render(self, console: Console) -> None:

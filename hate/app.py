@@ -54,7 +54,7 @@ def generate_character(id: str) -> Actor:
     spawn_x = my_engine.game_map.cool_center[0] + random.randint(1, 2)
     spawn_y = my_engine.game_map.cool_center[1] + random.randint(1, 2)
     player.place(spawn_x, spawn_y, my_engine.game_map)
-    #   print(vars(player))
+
     return player
 
 
@@ -123,10 +123,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     websocket_id = websocket.id
 
     char = generate_character(websocket_id)
-    #   print(vars(char))
     my_engine.insert_actor(char)
 
-    print("desu")
     try:
         while True:
             data = await websocket.receive_text()

@@ -75,6 +75,8 @@
             var componentElement = container.getElement()[0];
             var componentWidth = parseInt((componentElement.clientWidth) / 10);
             var componentHeight = parseInt((componentElement.clientHeight) / 10);
+            if (componentWidth <= 5) { componentWidth = 5 }
+            if (componentHeight <= 5) { componentHeight = 5 }
             console.log(componentHeight)
             display.setOptions({ width: componentWidth, height: componentHeight });
 
@@ -84,28 +86,34 @@
             resizeROTDisplay(container, display)
             display.clear();
             message_display.clear();
+            message_display.drawText(5, 2, game_state["info"]);
+            for (const x of Object.keys(game_state["visible"])) {
+                for (const y of Object.keys(game_state["visible"][x])) {
+                    console.log(game_state["visible"][x][y])
+                    if (game_state["visible"][x][y] === 2) {
+                        console.log("TRUEEE");
+                        console.log(game_state["visible"][x][y])
+                        display.draw(x, y, ' ', "#ff0000", "#ff0000");
+                    }
+                    else if (game_state["visible"][x][y] === 3) {
+                        console.log("TRUEEE");
+                        console.log(game_state["visible"][x][y])
+                        display.draw(x, y, ' ', "#00ff00", "#00ff00");
+                    }
+                    else if (game_state["visible"][x][y] === 4) {
+                        console.log("TRUEEE");
+                        console.log(game_state["visible"][x][y])
+                        display.draw(x, y, ' ', "#0000ff", "#0000ff");
+                    }
+                }
+            }
 
 
             for (const character in game_state) {
 
-                if (character == "info") {
-                    console.log(game_state[character])
 
 
-                    message_display.drawText(5, 2, game_state[character]);
-                }
-                else if (character == "visible") {
-                    console.log("VISIBLE")
-                    for (const x of Object.keys(game_state[character])) {
-                        for (const y of Object.keys(game_state[character][x])) {
-                            if (game_state[character][x][y] === true) {
-                                console.log("TRUEEE");
-                                display.draw(x, y, ' ', "#f00", "#f00");
-                            }
-                        }
-                    }
-                }
-                else {
+                if ((character != "visible") && (character != "info")) {
                     console.log(game_state[character])
 
                     const noob = game_state[character]
@@ -114,7 +122,7 @@
                     y = parseInt(noob[2])
 
                     // Draw the character
-                    display.draw(x, y, char, "#0f0")
+                    display.drawOver(x, y, char, "#FFFFF0", "#FFFFF0")
                 }
             }
         }
@@ -180,12 +188,12 @@
             function renderNextMessage() {
 
                 resizeROTDisplay(container, message_display)
-                if (true) {
+                if (messageIndex < messageLog.length) {
                     var message = messageLog[messageIndex];
                     message_display.drawText(5, 2, message);
                     messageIndex++;
                 }
-                //  else { clearInterval(intervalId); }// Stop the loop when all messages have been rendered
+                // else { clearInterval(intervalId); }// Stop the loop when all messages have been rendered
             }
 
             // Example message log
