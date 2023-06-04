@@ -183,7 +183,7 @@ class MainGameEventHandler(EventHandler):
         elif key == tcod.event.K_v:
             return HistoryViewer(self.engine)
 
-        elif key == tcod.event.K_g:
+        elif key == "take":
             action = PickupAction(player)
 
         elif key == tcod.event.K_i:

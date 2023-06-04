@@ -58,9 +58,6 @@ def generate_character(id: str) -> Actor:
     return player
 
 
-test_player = generate_character("test")
-
-
 class ConnectionManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []

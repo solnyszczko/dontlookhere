@@ -1,5 +1,5 @@
 from components import consumable, equippable
-from components.ai import HostileEnemy
+from components.ai import HostileEnemy, PlayerAI
 from components.equipment import Equipment
 from components.fighter import Fighter
 from components.inventory import Inventory
@@ -11,7 +11,7 @@ player = Actor(
     char="@",
     color=(255, 255, 255),
     name="Igrok",
-    ai_cls=HostileEnemy,
+    ai_cls=PlayerAI,
     equipment=Equipment(),
     fighter=Fighter(hp=30, base_defense=1, base_power=2),
     inventory=Inventory(capacity=26),

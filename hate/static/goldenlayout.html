@@ -36,6 +36,7 @@
             right: "ArrowRight",
             down: "ArrowDown",
             wait: "KeyW",
+            take: "KeyT"
         };
 
         var client_id = Date.now()
@@ -62,12 +63,15 @@
 
 
         // Example: Draw a green letter 'B' on the display
-        display.draw(2, 2, 'B', '#0f0');
+        display.draw(2, 2, ' ', "#0000ff", "#0000ff");
+        display.drawOver(2, 2, 'B', '#0f0', null);
 
         function resizeContainer() {
             var windowHeight = window.innerHeight;
+            var windowWidth = window.innerWidth;
             var containerElement = document.getElementById('layoutContainer');
             containerElement.style.height = windowHeight + 'px';
+            containerElement.style.width = windowWidth + 'px';
             myLayout.updateSize(); // Update GoldenLayout with new size
         }
 
@@ -118,11 +122,13 @@
 
                     const noob = game_state[character]
                     char = noob[0]
+                    console.log("CHAR")
+                    console.log(char)
                     x = parseInt(noob[1])
                     y = parseInt(noob[2])
 
                     // Draw the character
-                    display.drawOver(x, y, char, "#FFFFF0", "#FFFFF0")
+                    display.draw(x, y, char, "#0000ff", null);
                 }
             }
         }
@@ -224,6 +230,9 @@
                 ws.send("down")
             } else if (event.code === keyBindings.wait) {
                 ws.send("wait")
+            }
+            else if (event.code === keyBindings.take) {
+                ws.send("take")
             }
         });
         // Resize container initially
