@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+
+
 <html>
 
 <head>
@@ -28,12 +30,6 @@
             background-color: #af1616;
         }
 
-        .wrapper {
-            background-color: rgb(57, 186, 236);
-            padding: 0px;
-            color: #492c2c;
-            display: flow-root;
-        }
 
 
         .item-2 {
@@ -52,15 +48,20 @@
             background-color: #d0d0d0;
         }
 
-        .box {
-            width: 200px;
-            height: 200px;
-            background-color: lightblue;
-            float: left;
-            border-radius: 0px;
-            padding: 0em;
-            margin-right: 0px;
+        #tooltip {
+            display: none;
+            width: max-content;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #222;
+            color: white;
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 90%;
         }
+
 
         @media (max-width: 768px) {
 
@@ -75,6 +76,10 @@
 
 <body>
     <script src="/static/rot.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.2.6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.2.9"></script>
+
+
     <script>
         var keyBindings = {
             up: "ArrowUp",
@@ -137,29 +142,9 @@
             }
         }
 
-        // Attach event listener to window resize event
-        //    window.addEventListener('resize', resizeContainer);
-        window.addEventListener("keydown", (event) => {
-            console.log(event.code)
-            if (event.code === keyBindings.up) {
-                ws.send("up")
-            } else if (event.code === keyBindings.left) {
-                ws.send("left")
-            } else if (event.code === keyBindings.right) {
-                ws.send("right")
-            } else if (event.code === keyBindings.down) {
-                ws.send("down")
-            } else if (event.code === keyBindings.wait) {
-                ws.send("wait")
-            } else if (event.code === keyBindings.take) {
-                ws.send("take")
-            } else if (event.code === keyBindings.inventory) {
-                // Toggle the float property of the box
-                const currentFloat = box.style.float;
-                box.style.float = (currentFloat === 'left') ? 'right' : 'left';
-                //  inventory_handler();
-            }
-        });
+
+
+
         ws.addEventListener('message', event => {
             //   console.log(event.data)
             const game_state_parsed = JSON.parse(event.data)
@@ -198,21 +183,24 @@
 
 
     </script>
+
+    <div id="tooltip" role="tooltip">My tooltip</div>
     <div class="grid-container">
 
         <div class="item-1" id="main">
-            <div class="wrapper">
-                <script>   // Initialize the ROT.js display
-                    // Initialize the ROT.js display
-                    var displayContainer = document.getElementById("main");
 
-                    displayContainer.appendChild(main_display.getContainer());
-                    resizeROTDisplay("main", main_display);
-                </script>
-                <div class="box">Float</div>
-            </div>
+            <script>   // Initialize the ROT.js display
+                // Initialize the ROT.js display
+                var displayContainer = document.getElementById("main");
+
+                displayContainer.appendChild(main_display.getContainer());
+                resizeROTDisplay("main", main_display);
+            </script>
+
+
 
         </div>
+
 
 
 
@@ -230,6 +218,63 @@
                 // Another script inside div
 
 
+            </script>
+            <script type="module">
+
+
+                import {
+                    computePosition,
+                    flip,
+                    shift,
+                    offset,
+                } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.2.9/+esm';
+
+                const button = document.getElementById("info")
+                const tooltip = document.querySelector('#tooltip');
+
+                function update() {
+                    computePosition(button, tooltip, {
+                        placement: 'left-start',
+                        middleware: [offset(6), flip(), shift({ padding: 5 })],
+                    }).then(({ x, y }) => {
+                        Object.assign(tooltip.style, {
+                            left: `${x}px`,
+                            top: `${y}px`,
+                        });
+                    });
+                }
+
+                function showTooltip() {
+                    tooltip.style.display = 'block';
+                    update();
+                }
+
+                function hideTooltip() {
+                    tooltip.style.display = '';
+                }
+
+                // Attach event listener to window resize event
+                //    window.addEventListener('resize', resizeContainer);
+                window.addEventListener("keydown", (event) => {
+                    console.log(event.code)
+                    if (event.code === keyBindings.up) {
+                        ws.send("up")
+                    } else if (event.code === keyBindings.left) {
+                        ws.send("left")
+                    } else if (event.code === keyBindings.right) {
+                        ws.send("right")
+                    } else if (event.code === keyBindings.down) {
+                        ws.send("down")
+                    } else if (event.code === keyBindings.wait) {
+                        ws.send("wait")
+                    } else if (event.code === keyBindings.take) {
+                        ws.send("take")
+                    } else if (event.code === keyBindings.inventory) {
+                        showTooltip()
+
+                        //  inventory_handler();
+                    }
+                });
             </script>
         </div>
     </div>
