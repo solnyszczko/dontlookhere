@@ -29,6 +29,44 @@
     <script src="/static/rot.js"></script>
 
     <script>
+
+        var config = {
+            settings: {
+                hasHeaders: true,
+                constrainDragToContainer: true,
+                reorderEnabled: true,
+                selectionEnabled: false,
+                popoutWholeStack: false,
+                blockedPopoutsThrowError: true,
+                closePopoutsOnUnload: true,
+                showPopoutIcon: false,
+                showMaximiseIcon: false,
+                showCloseIcon: false
+            },
+            content: [{
+
+                type: 'row',
+                content: [{
+                    type: 'component',
+                    componentName: 'meow',
+                    componentState: { label: 'Component 1' },
+                    width: 80
+                }, {
+                    type: 'column',
+                    content: [{
+                        type: 'component',
+                        componentName: 'mjau',
+                        componentState: { label: 'Component 2' },
+                        height: 70
+                    }, {
+                        type: 'component',
+                        componentName: 'exampleComponent',
+                        componentState: { label: 'Component 3' },
+                        height: 30
+                    }]
+                }]
+            }]
+        };
         var myLayout = null; // Declare myLayout variable
         let keyBindings = {
             up: "ArrowUp",
@@ -36,7 +74,9 @@
             right: "ArrowRight",
             down: "ArrowDown",
             wait: "KeyW",
-            take: "KeyT"
+            take: "KeyT",
+            inventory: "KeyI",
+            tab: "Tab"
         };
 
         var client_id = Date.now()
@@ -66,6 +106,11 @@
         display.draw(2, 2, ' ', "#0000ff", "#0000ff");
         display.drawOver(2, 2, 'B', '#0f0', null);
 
+        var tiles = null;
+        var info = null;
+        var inventory = null;
+        var entities = {};
+
         function resizeContainer() {
             var windowHeight = window.innerHeight;
             var windowWidth = window.innerWidth;
@@ -75,94 +120,75 @@
             myLayout.updateSize(); // Update GoldenLayout with new size
         }
 
+        function inventory_handler() {
+
+
+        }
+
         function resizeROTDisplay(container, display) {
             var componentElement = container.getElement()[0];
             var componentWidth = parseInt((componentElement.clientWidth) / 10);
             var componentHeight = parseInt((componentElement.clientHeight) / 10);
             if (componentWidth <= 5) { componentWidth = 5 }
             if (componentHeight <= 5) { componentHeight = 5 }
-            console.log(componentHeight)
             display.setOptions({ width: componentWidth, height: componentHeight });
 
         }
 
-        function update_display(game_state, container) {
+        function update_display(container) {
             resizeROTDisplay(container, display)
             display.clear();
             message_display.clear();
-            message_display.drawText(5, 2, game_state["info"]);
-            for (const x of Object.keys(game_state["visible"])) {
-                for (const y of Object.keys(game_state["visible"][x])) {
-                    console.log(game_state["visible"][x][y])
-                    if (game_state["visible"][x][y] === 2) {
-                        console.log("TRUEEE");
-                        console.log(game_state["visible"][x][y])
+            message_display.drawText(5, 2, info);
+            for (const x of Object.keys(tiles)) {
+                for (const y of Object.keys(tiles[x])) {
+                    if (tiles[x][y] === 2) {
                         display.draw(x, y, ' ', "#ff0000", "#ff0000");
                     }
-                    else if (game_state["visible"][x][y] === 3) {
-                        console.log("TRUEEE");
-                        console.log(game_state["visible"][x][y])
+                    else if (tiles[x][y] === 3) {
                         display.draw(x, y, ' ', "#00ff00", "#00ff00");
                     }
-                    else if (game_state["visible"][x][y] === 4) {
-                        console.log("TRUEEE");
-                        console.log(game_state["visible"][x][y])
+                    else if (tiles[x][y] === 4) {
                         display.draw(x, y, ' ', "#0000ff", "#0000ff");
                     }
                 }
             }
+            for (const character in entities) {
+                const noob = entities[character]
+                char = noob[0]
+                x = noob[1]
+                y = noob[2]
 
+                // Draw the character
+                display.draw(x, y, char, "#0000ff", null);
 
-            for (const character in game_state) {
-
-
-
-                if ((character != "visible") && (character != "info")) {
-                    console.log(game_state[character])
-
-                    const noob = game_state[character]
-                    char = noob[0]
-                    console.log("CHAR")
-                    console.log(char)
-                    x = parseInt(noob[1])
-                    y = parseInt(noob[2])
-
-                    // Draw the character
-                    display.draw(x, y, char, "#0000ff", null);
-                }
             }
         }
 
 
-        var config = {
-            content: [{
-                type: 'row',
-                content: [{
-                    type: 'component',
-                    componentName: 'meow',
-                    componentState: { label: 'Component 1' },
-                    width: 80
-                }, {
-                    type: 'column',
-                    content: [{
-                        type: 'component',
-                        componentName: 'mjau',
-                        componentState: { label: 'Component 2' },
-                        height: 70
-                    }, {
-                        type: 'component',
-                        componentName: 'exampleComponent',
-                        componentState: { label: 'Component 3' },
-                        height: 30
-                    }]
-                }]
-            }]
-        };
 
         myLayout = new GoldenLayout(config, '#layoutContainer');
 
         myLayout.registerComponent('exampleComponent', function (container, state) {
             container.getElement().html('<h2>' + state.label + '</h2>');
+            // Hides the component on key press
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'h') {
+                    //container.setSize(1, 1);
+                    container.getElement().hide();
+
+
+                }
+            });
+
+            // Unhides the component on key press
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'u') {
+                    // container.setSize(100, 100);
+                    container.getElement().show();
+
+                }
+            });
         });
 
         myLayout.registerComponent('meow', function (container, state) {
@@ -170,15 +196,17 @@
 
             //   var containers = myLayout.getComponentsByName('meow');
             //  desu = containers[0]
+            function renderboop() {
+
+                update_display(container)
+                // else { clearInterval(intervalId); }// Stop the loop when all messages have been rendered
+            }
 
 
+            // Start the loop
+            var intervalId = setInterval(renderboop, 100); // Adjust the delay (in milliseconds) as needed
 
-            ws.onmessage = function (event) {
-                //   console.log(event.data)
-                const game_state_parsed = JSON.parse(event.data)
-                //  console.log(event)
-                update_display(game_state_parsed, container)
-            };
+
 
         });
         myLayout.registerComponent('mjau', function (container, state) {
@@ -208,7 +236,7 @@
             messageLog.push("Message 3");
 
             // Start the loop
-            var intervalId = setInterval(renderNextMessage, 1000); // Adjust the delay (in milliseconds) as needed
+            var intervalId = setInterval(renderNextMessage, 100); // Adjust the delay (in milliseconds) as needed
 
 
 
@@ -219,7 +247,7 @@
         // Attach event listener to window resize event
         window.addEventListener('resize', resizeContainer);
         window.addEventListener("keydown", (event) => {
-            //   console.log(event.code)
+            console.log(event.code)
             if (event.code === keyBindings.up) {
                 ws.send("up")
             } else if (event.code === keyBindings.left) {
@@ -230,10 +258,35 @@
                 ws.send("down")
             } else if (event.code === keyBindings.wait) {
                 ws.send("wait")
-            }
-            else if (event.code === keyBindings.take) {
+            } else if (event.code === keyBindings.take) {
                 ws.send("take")
+            } else if (event.code === keyBindings.inventory) {
+                inventory_handler();
             }
+        });
+        ws.addEventListener('message', event => {
+            //   console.log(event.data)
+            const game_state_parsed = JSON.parse(event.data)
+            tiles = game_state_parsed["visible"]
+            info = game_state_parsed["info"]
+            inventory = game_state_parsed["inventory"]
+            console.log(inventory)
+            for (const character in game_state_parsed) {
+
+
+
+                if ((character != "visible") && (character != "info")) {
+                    let noob = game_state_parsed[character]
+                    let char = noob[0]
+                    let x = parseInt(noob[1])
+                    let y = parseInt(noob[2])
+
+
+                    entities[character] = [char, x, y]
+                }
+            }
+            //  console.log(event)
+
         });
         // Resize container initially
         resizeContainer();

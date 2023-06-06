@@ -122,7 +122,12 @@ class Engine:
             print(smaller_array)
             desu = self.unique_messages[id]
 
+            char_list = []
+            for item in player.inventory.items:
+                char_list.append([item.id, item.char])
+
             y["visible"] = smaller_array.tolist()
+            y["inventory"] = char_list
             y["info"] = "lol" + str(random.randint(0, 100))
             for entity in entities_sorted_for_rendering:
                 if desu[entity.x, entity.y]:

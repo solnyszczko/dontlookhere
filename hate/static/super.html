@@ -2,192 +2,145 @@
 <html>
 
 <head>
-    <link rel="stylesheet" type="text/css" href="/static/goldenlayout-base.css">
-    <link rel="stylesheet" type="text/css" href="/static/goldenlayout-dark-theme.css">
     <style>
-        /* Set the height of the container */
-        #layoutContainer {
+        .grid-container {
+            display: grid;
+            grid-template-columns: 70% 30%;
+            grid-template-rows: 50% 50%;
             height: 100vh;
-            /* Set initial height */
+
+
+            /* Set the grid container height to fill the viewport */
         }
 
-        /* Disable scrolling */
         html,
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
         }
+
+        .item-1 {
+            grid-column: 1 / 2;
+            /* Takes up the first column */
+            grid-row: 1 / 3;
+            /* Stretches from the first row to the second row */
+            background-color: #af1616;
+        }
+
+        .wrapper {
+            background-color: rgb(57, 186, 236);
+            padding: 0px;
+            color: #492c2c;
+            display: flow-root;
+        }
+
+
+        .item-2 {
+            grid-column: 2 / 3;
+            /* Takes up the second column */
+            grid-row: 1 / 3;
+            /* Stretches from the first row to the second row */
+            background-color: #e0e0e0;
+        }
+
+        .item-3 {
+            grid-column: 2 / 3;
+            /* Takes up the second column */
+            grid-row: 2 / 3;
+            /* Occupies the second row */
+            background-color: #d0d0d0;
+        }
+
+        .box {
+            width: 200px;
+            height: 200px;
+            background-color: lightblue;
+            float: left;
+            border-radius: 0px;
+            padding: 0em;
+            margin-right: 0px;
+        }
+
+        @media (max-width: 768px) {
+
+            /* Apply styles when the browser width is less than or equal to 768px */
+            .grid-container {
+                grid-template-columns: 90% 10%;
+            }
+
+        }
     </style>
 </head>
 
 <body>
-    <div id="layoutContainer"></div>
-
-    <script src="/static/jquery-1.11.1.min.js"></script>
-    <script src="/static/goldenlayout.min.js"></script>
     <script src="/static/rot.js"></script>
-
     <script>
-        var myLayout = null; // Declare myLayout variable
-        let keyBindings = {
+        var keyBindings = {
             up: "ArrowUp",
             left: "ArrowLeft",
             right: "ArrowRight",
             down: "ArrowDown",
             wait: "KeyW",
+            take: "KeyT",
+            inventory: "KeyI",
+            tab: "Tab"
         };
-
         var client_id = Date.now()
         var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+        //ALL THE GAME INFO BEING TRANSFERRED OVER NETWORK
+        var tiles = [];
+        var info = "meow";
+        var inventory = [];
+        var entities = {};
 
-        // Create a container element within the component's content
-        var displayContainer = document.createElement('div');
-        displayContainer.id = 'rotDisplay'; // Set an ID for the container element
-        displayContainer.style.height = '100%';
-
-        // Initialize the ROT.js display
-        var display = new ROT.Display({ width: 100, height: 60 });
-        displayContainer.appendChild(display.getContainer());
-
-
-        // Create a container element within the component's content MESSAGES
-        var message_displayContainer = document.createElement('div');
-        message_displayContainer.id = 'messageDisplay'; // Set an ID for the container element
-        message_displayContainer.style.height = '100%';
-
-        // Initialize the ROT.js display
-        var message_display = new ROT.Display({ width: 100, height: 60 });
-        message_displayContainer.appendChild(message_display.getContainer());
+        var main_display = new ROT.Display({ width: 10, height: 10 });
+        var info_display = new ROT.Display({ width: 10, height: 10 });
 
 
+        function resizeROTDisplay(element_id, display) {
+            var componentElement = document.getElementById(element_id);
+            var componentWidth = parseInt((componentElement.clientWidth) / 10);
+            var componentHeight = parseInt((componentElement.clientHeight) / 10);
+            if (componentWidth <= 5) { componentWidth = 5 }
+            if (componentHeight <= 5) { componentHeight = 5 }
+            display.setOptions({ width: componentWidth, height: componentHeight });
 
-
-        // Example: Draw a green letter 'B' on the display
-        display.draw(2, 2, 'B', '#0f0');
-        message_display.drawText(5, 2, "Hello world");
-
-        function resizeContainer() {
-            var windowHeight = window.innerHeight;
-            var containerElement = document.getElementById('layoutContainer');
-            containerElement.style.height = windowHeight + 'px';
-            myLayout.updateSize(); // Update GoldenLayout with new size
         }
-
-        var config = {
-            content: [{
-                type: 'row',
-                content: [{
-                    type: 'component',
-                    componentName: 'meow',
-                    componentState: { label: 'Component 1' },
-                    width: 80
-                }, {
-                    type: 'column',
-                    content: [{
-                        type: 'component',
-                        componentName: 'mjau',
-                        componentState: { label: 'Component 2' },
-                        height: 50
-                    }, {
-                        type: 'component',
-                        componentName: 'exampleComponent',
-                        componentState: { label: 'Component 3' },
-                        height: 50
-                    }]
-                }]
-            }]
-        };
-
-        myLayout = new GoldenLayout(config, '#layoutContainer');
-
-        myLayout.registerComponent('exampleComponent', function (container, state) {
-            container.getElement().html('<h2>' + state.label + '</h2>');
-        });
-
-        myLayout.registerComponent('meow', function (container, state) {
-            container.getElement().append(displayContainer);
-
-            function resizeROTDisplay() {
-                var componentElement = container.getElement()[0];
-                var componentWidth = parseInt((componentElement.clientWidth) / 10);
-                var componentHeight = parseInt((componentElement.clientHeight) / 10);
-                console.log("ROT DISPLAY")
-                display.setOptions({ width: componentWidth, height: componentHeight });
-
-            }
-
-            function update_display(game_state) {
-                display.clear();
-                resizeROTDisplay()
-
-                for (const character in game_state) {
-                    if (character != "visible") {
-                        console.log(game_state[character])
-
-                        const noob = game_state[character]
-                        char = noob[0]
-                        x = parseInt(noob[1])
-                        y = parseInt(noob[2])
-
-                        // Draw the character
-                        display.draw(x, y, char, "#0f0")
+        function update_displays(main_display, info_display) {
+            console.log("meowww")
+            main_display.clear();
+            info_display.clear();
+            info_display.drawText(5, 2, info);
+            for (const x of Object.keys(tiles)) {
+                for (const y of Object.keys(tiles[x])) {
+                    if (tiles[x][y] === 2) {
+                        main_display.draw(x, y, '.', "#ff0000", "#ff0000");
                     }
-                    if (character == "visible") {
-                        console.log("VISIBLE")
-                        for (const x in game_state[character]) {
-                            for (const y in game_state[character][x]) {
-                                if (game_state[character][x][y] == true) {
-                                    console.log("TRUEEE")
-
-                                    display.draw(x, y, ' ', "#f00", "#f00")
-
-                                }
-
-                            }
-
-                        }
+                    else if (tiles[x][y] === 3) {
+                        main_display.draw(x, y, '.', "#00ff00", "#00ff00");
+                    }
+                    else if (tiles[x][y] === 4) {
+                        main_display.draw(x, y, '.', "#0000ff", "#0000ff");
                     }
                 }
             }
-            ws.onmessage = function (event) {
-                //   console.log(event.data)
-                const game_state_parsed = JSON.parse(event.data)
-                //  console.log(event)
-                update_display(game_state_parsed)
-            };
+            for (const character in entities) {
+                const noob = entities[character]
+                char = noob[0]
+                x = noob[1]
+                y = noob[2]
 
-        });
-
-        myLayout.registerComponent('mjau', function (container, state) {
-            container.getElement().append(message_displayContainer);
-
-            function resizeMESSAGEDisplay() {
-                console.log(container)
-                var componentElement = container.getElement()[0];
-                var componentWidth = parseInt((componentElement.clientWidth) / 10);
-                var componentHeight = parseInt((componentElement.clientHeight) / 10);
-                console.log(componentHeight)
-                message_display.setOptions({ width: componentWidth, height: componentHeight });
+                // Draw the character
+                main_display.draw(x, y, char, "#0000ff", null);
 
             }
-
-            function update_message_display(game_state) {
-                message_display.clear();
-                resizeMESSAGEDisplay()
-                message_display.drawText(5, 2, "Hello world");
-
-
-            }
-            update_message_display("meow")
-        });
-        myLayout.init();
-
+        }
 
         // Attach event listener to window resize event
-        window.addEventListener('resize', resizeContainer);
+        //    window.addEventListener('resize', resizeContainer);
         window.addEventListener("keydown", (event) => {
-            //   console.log(event.code)
+            console.log(event.code)
             if (event.code === keyBindings.up) {
                 ws.send("up")
             } else if (event.code === keyBindings.left) {
@@ -198,11 +151,86 @@
                 ws.send("down")
             } else if (event.code === keyBindings.wait) {
                 ws.send("wait")
+            } else if (event.code === keyBindings.take) {
+                ws.send("take")
+            } else if (event.code === keyBindings.inventory) {
+                // Toggle the float property of the box
+                const currentFloat = box.style.float;
+                box.style.float = (currentFloat === 'left') ? 'right' : 'left';
+                //  inventory_handler();
             }
         });
-        // Resize container initially
-        resizeContainer();
-    </script>
-</body>
+        ws.addEventListener('message', event => {
+            //   console.log(event.data)
+            const game_state_parsed = JSON.parse(event.data)
+            console.log(game_state_parsed)
+            tiles = game_state_parsed["visible"]
+            info = game_state_parsed["info"]
+            inventory = game_state_parsed["inventory"]
+            console.log(inventory)
+            entities = []
+            for (const character in game_state_parsed) {
 
-</html>
+
+
+                if ((character != "visible") && (character != "info")) {
+                    let noob = game_state_parsed[character]
+                    let char = noob[0]
+                    let x = parseInt(noob[1])
+                    let y = parseInt(noob[2])
+
+
+                    entities[character] = [char, x, y]
+                }
+            }
+            //  console.log(event)
+
+        });
+
+
+
+        function myFunction() {
+            update_displays(main_display, info_display)
+        }
+
+        var intervalId = setInterval(myFunction, 50); // Execute myFunction every 1 second (1000 milliseconds)
+
+
+
+    </script>
+    <div class="grid-container">
+
+        <div class="item-1" id="main">
+            <div class="wrapper">
+                <script>   // Initialize the ROT.js display
+                    // Initialize the ROT.js display
+                    var displayContainer = document.getElementById("main");
+
+                    displayContainer.appendChild(main_display.getContainer());
+                    resizeROTDisplay("main", main_display);
+                </script>
+                <div class="box">Float</div>
+            </div>
+
+        </div>
+
+
+
+        <div class="item-2" id="info">
+            <script>
+                // Initialize the ROT.js display
+                var messageContainer = document.getElementById("info");
+
+                messageContainer.appendChild(info_display.getContainer());
+                resizeROTDisplay("info", info_display);
+            </script>
+        </div>
+        <div class="item-3" id="lol">
+            <script>
+                // Another script inside div
+
+
+            </script>
+        </div>
+    </div>
+</body>

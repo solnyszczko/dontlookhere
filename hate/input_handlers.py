@@ -186,7 +186,7 @@ class MainGameEventHandler(EventHandler):
         elif key == "take":
             action = PickupAction(player)
 
-        elif key == tcod.event.K_i:
+        elif key == "inventory":
             return InventoryActivateHandler(self.engine)
         elif key == tcod.event.K_d:
             return InventoryDropHandler(self.engine)
