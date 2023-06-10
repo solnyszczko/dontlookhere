@@ -3,8 +3,13 @@ import logo from './logo.svg';
 import ROT from 'rot-js';
 import './App.css';
 import ReactRogue from './components/ReactRogue';
+import phaserGame from './PhaserGame'
+import HelloWorldScene from './scenes/HelloWorldScene'
 
-
+const handleClick = () => {
+  const scene = phaserGame.scene.keys.helloworld 
+  scene.createEmitter()
+}
 
 const Gamer = () => {
   const mainRef = useRef(null);
@@ -14,6 +19,12 @@ const Gamer = () => {
     const mainElement = mainRef.current;
   //  var main_display = new ROT.Display({ width: 10, height: 10 });
 
+
+
+
+
+
+  
     // Perform any necessary operations on the main element
 
     // Example: Set innerHTML of the main element
@@ -41,8 +52,8 @@ class App extends Component {
         </div>
         <div className="grid-container">
         <div className="item-1" id="main">desu
-        <Gamer />
-        <ReactRogue width={40} height={40} tilesize={16} />
+        <handleClick />
+
         
         </div>
         <div className="item-2" id="info"></div>
@@ -56,3 +67,7 @@ class App extends Component {
 }
 
 export default App;
+
+
+//<Gamer />
+//<ReactRogue width={40} height={40} tilesize={16} />
