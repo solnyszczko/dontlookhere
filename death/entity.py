@@ -5,7 +5,7 @@ import copy
 import math
 import numpy as np
 import random
-import ulid
+from ulid import ULID
 
 from render_order import RenderOrder
 
@@ -40,7 +40,7 @@ class Entity:
         blocks_movement: bool = False,
         render_order: RenderOrder = RenderOrder.CORPSE,
     ):
-        self.id: Optional[str] = str(ulid.ULID())
+        self.id: Optional[str] = str(ULID())
         self.x = x
         self.y = y
         self.char = char
@@ -66,7 +66,7 @@ class Entity:
         clone = copy.deepcopy(self)
         clone.x = x
         clone.y = y
-        clone.id = str(ulid.ULID())
+        clone.id = str(ULID())
         clone.parent = gamemap
         gamemap.entities.add(clone)
         return clone

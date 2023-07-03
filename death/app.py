@@ -14,7 +14,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from typing import Dict, List, Optional
 from fastapi.staticfiles import StaticFiles
 import random
-import ulid
+from ulid import ULID
 import json
 import copy
 import asyncio
@@ -64,7 +64,7 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        websocket.id = str(ulid.ULID())
+        websocket.id = str(ULID())
         self.active_connections.append(websocket)
 
     def disconnect(self, websocket: WebSocket):
